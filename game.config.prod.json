@@ -1,0 +1,6 @@
+{
+  "usesPreloader": false,
+  "fullscreenEnabled": true,
+  "orientation": "portrait",
+  "maxDpr": 1.5
+}
