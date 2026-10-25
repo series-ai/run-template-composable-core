@@ -121,12 +121,11 @@ export function GameShell({
       data-ui-theme="game-shell"
       style={style}
     >
-      {/* World / Canvas background layer */}
+
       <div className="game-shell__world" inert={isMenuOpen}>
         {children}
       </div>
 
-      {/* Screen HUD for active and paused gameplay */}
       {(view.status === 'running' || view.status === 'paused') ? (
         <GameShellHud
           actions={actions}
@@ -136,7 +135,6 @@ export function GameShell({
         />
       ) : null}
 
-      {/* On-screen touch controls for mobile */}
       {view.status === 'running' ? (
         <VirtualTouchControls
           actions={actions}
@@ -145,7 +143,6 @@ export function GameShell({
         />
       ) : null}
 
-      {/* Start screen overlay */}
       {view.status === 'ready' ? (
         <GameShellStartOverlay
           actions={actions}
@@ -155,7 +152,6 @@ export function GameShell({
         />
       ) : null}
 
-      {/* Loading state screen */}
       {view.status === 'loading' ? (
         <div className="game-shell__screen-overlay">
           <SkinState
@@ -166,7 +162,6 @@ export function GameShell({
         </div>
       ) : null}
 
-      {/* Error retry state screen */}
       {view.status === 'error' ? (
         <div className="game-shell__screen-overlay">
           <SkinState
@@ -179,7 +174,6 @@ export function GameShell({
         </div>
       ) : null}
 
-      {/* Pause menu dialog */}
       <GameShellPauseMenu
         actions={actions}
         onOpenHelp={() => setHelpOpen(true)}
@@ -187,14 +181,12 @@ export function GameShell({
         open={view.status === 'paused' && !settingsOpen && !helpOpen}
       />
 
-      {/* Results screen dialog */}
       <GameShellResultsOverlay
         actions={actions}
         open={view.status === 'results' && !settingsOpen && !helpOpen}
         view={view}
       />
 
-      {/* Settings modal dialog */}
       <GameShellSettingsDialog
         onClose={() => setSettingsOpen(false)}
         onUpdateSettings={actions.setSettings}
@@ -202,7 +194,6 @@ export function GameShell({
         settings={view.settings}
       />
 
-      {/* Help / Instructions modal dialog */}
       <GameShellHelpDialog
         instructions={view.instructions}
         onClose={() => setHelpOpen(false)}

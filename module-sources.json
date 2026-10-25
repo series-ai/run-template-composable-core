@@ -36,7 +36,7 @@
         "camera.ts": "cb7ccfa689ad3c8977f3faa4ab01f574b6141d10f836ea11b21dd3d77f792c7b",
         "fixedCodepointSort.ts": "baf6bcd617054fb6e871799334021bbba11f25d4459368dc00d3ef2d89ff571e",
         "materials.ts": "6d1c6f30820fb3e7d6f8f33d93e1a0b0ae168d14ed766fe75e4a56bf1e0aa8a2",
-        "tileContours.ts": "0c9cdc78ab1c9df78d30760125865d4c87063bba3bd14418c90e93a2f876f724",
+        "tileContours.ts": "cf8b02f0405fd9f98ca995f8e473f5a858f865cd06fc5bc936cf466992566d49",
         "tilemap.ts": "fe535aad2d2986bfe132cc3bb5c1a973d60839302a9ccf1d697b76cda7713f8f",
         "types.ts": "41b7628ea8bee0d056be60a7aa9c34cb71ba778827e76b4c806a30e45c515901",
         "SKILL.md": "33aaa6a4788ed622469984f77427fb4977895a634e2d46dd67975da941596503",
@@ -65,7 +65,7 @@
     "ui/game-shell": {
       "source": "modules/ui/game-shell",
       "files": {
-        "GameShell.tsx": "555fca6e464c019289e1d0dfc7f04d9e3e1848eb4d95800919e7626bd4754888",
+        "GameShell.tsx": "2c0f81c93fca08c6dbdaf2cdff0759f3e8a49cd5e09144306bd0dcb8c591c8c3",
         "GameShellHelpDialog.tsx": "0eb38ec57d80af3a6103bed48b17c4e9605361483f4b5e15244d34cd667e3060",
         "GameShellHud.tsx": "5a5aa0b066499573c7603c69878c5fbf15d7dc52d965a1e7083ce99b7e46d8aa",
         "GameShellPauseMenu.tsx": "a0e353907622571536a1f4cedd45e41ca69788540a30a10fe3d9f0072211e281",

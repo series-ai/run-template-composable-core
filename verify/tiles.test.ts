@@ -1,8 +1,3 @@
-/**
- * Invariant tests for TileLayer and seam-safe tile contours.
- * Write all comments in ASD-STE100 Simplified Technical English.
- */
-
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { existsSync } from 'node:fs';
@@ -16,16 +11,13 @@ const {
   traceGridContours,
   simplifyContourVertices,
   computeSignedPolygonArea,
-  build100TileFloorCase,
-  build100TileFloorCollisionPlan,
-  create100TileFloorFixture,
 } = await import(new URL('tileContours.ts', source).href);
 const { SpriteScene } = await import(new URL('SpriteScene.ts', source).href);
 
 await p2.initPhysics2D();
 
 test('100 adjacent tile floor moves real WASM body across all 99 seams with zero stops', () => {
-  const { plan } = create100TileFloorFixture({ tileCount: 100, tileSizeMeters: 1.0 });
+  const plan = buildTileContours({ width: 100, height: 1, tileSizeMeters: 1, solidCells: new Array(100).fill(true) });
 
   assert.equal(plan.loops.length, 1, '100 adjacent floor tiles must produce exactly one loop');
   assert.equal(plan.totalVertices, 4, 'Collinear edges must simplify to four corners');
@@ -288,7 +280,6 @@ test('atomic replacement replaces physics body after tile edit and replays check
     assert.equal(editedPlan.revision, 2);
     assert.equal(editedPlan.bounds.maxX, 5);
 
-    // Atomically replace floor body in physics world.
     const replaceResult = world.edit((edit) =>
       edit.replaceBody(floorHandle, {
         kind: 'static',
@@ -308,7 +299,6 @@ test('atomic replacement replaces physics body after tile edit and replays check
       world.step();
     }
 
-    // Capture checkpoint after atomic replacement.
     const checkpoint = world.captureCheckpoint();
     const bytes = world.serializeCheckpoint(checkpoint);
     world.releaseCheckpoint(checkpoint);
@@ -321,7 +311,6 @@ test('atomic replacement replaces physics body after tile edit and replays check
     const steppedDigest = world.digest();
     assert.notEqual(steppedDigest, initialDigest);
 
-    // Restore checkpoint and verify identical replay.
     world.restore(bytes);
     assert.equal(world.digest(), initialDigest, 'Restored digest must match captured digest');
 
@@ -358,12 +347,10 @@ test('TileLayer tracks bounds across tile edits and throws on out-of-bounds edit
     assert.equal(layerBounds.maxX, 30);
     assert.equal(layerBounds.maxY, 32);
 
-    // Initial collision bounds with no solid tiles.
     const emptyPlan = layer.buildCollisionPlan();
     assert.equal(emptyPlan.loops.length, 0);
     assert.deepEqual(emptyPlan.bounds, { minX: 0, minY: 0, maxX: 0, maxY: 0 });
 
-    // Set first tile at top-left (col 0, row 0).
     // In top-down row 0, world Y is [30.5, 32], world X is [10, 12].
     layer.setTile(0, 0, 'block');
     const plan1 = layer.buildCollisionPlan();
@@ -372,7 +359,6 @@ test('TileLayer tracks bounds across tile edits and throws on out-of-bounds edit
     assert.equal(plan1.bounds.minY, 30.5);
     assert.equal(plan1.bounds.maxY, 32);
 
-    // Set tile at bottom-right (col 9, row 7).
     // Row 7 is bottom row: world Y is [20, 21.5], world X is [28, 30].
     layer.setTile(9, 7, 'block');
     const plan2 = layer.buildCollisionPlan();
@@ -381,7 +367,6 @@ test('TileLayer tracks bounds across tile edits and throws on out-of-bounds edit
     assert.equal(plan2.bounds.minY, 20);
     assert.equal(plan2.bounds.maxY, 32);
 
-    // Out-of-bounds coordinates throw RangeError.
     assert.throws(() => layer.setTile(-1, 0, 'block'), RangeError);
     assert.throws(() => layer.setTile(10, 0, 'block'), RangeError);
     assert.throws(() => layer.setTile(0, 8, 'block'), RangeError);
@@ -415,23 +400,18 @@ test('TileLayer updates animated frames with injected clock and pauses when susp
     const tileSpriteId = 'anim-layer:tile:0_0';
     assert.equal(scene.getNode(tileSpriteId)?.frameId, 'w1');
 
-    // Advance to 150 ms (frame 1 -> w2).
     layer.update({ frameIndex: 1, activeSeconds: 0.15, deltaSeconds: 0.016 });
     assert.equal(scene.getNode(tileSpriteId)?.frameId, 'w2');
 
-    // Advance to 250 ms (frame 2 -> w3).
     layer.update({ frameIndex: 2, activeSeconds: 0.25, deltaSeconds: 0.016 });
     assert.equal(scene.getNode(tileSpriteId)?.frameId, 'w3');
 
-    // Advance to 350 ms (frame 3 -> w4).
     layer.update({ frameIndex: 3, activeSeconds: 0.35, deltaSeconds: 0.016 });
     assert.equal(scene.getNode(tileSpriteId)?.frameId, 'w4');
 
-    // Advance to 550 ms with suspended=true: frame must stay at w4.
     layer.update({ frameIndex: 4, activeSeconds: 0.55, deltaSeconds: 0.016, suspended: true });
     assert.equal(scene.getNode(tileSpriteId)?.frameId, 'w4', 'Suspended clock must not advance frame');
 
-    // Calling update without clock does not throw.
     layer.update();
     assert.equal(scene.getNode(tileSpriteId)?.frameId, 'w4');
   } finally {
@@ -504,11 +484,9 @@ test('TileLayer dispose removes all registered nodes and rejects calls after dis
   assert.equal(scene.getNode(tileId), undefined, 'Tile node must be removed');
   assert.equal(scene.getNode(chunkId), undefined, 'Chunk node must be removed');
 
-  // Second dispose is safe no-op.
   layer.dispose();
   assert.equal(layer.isDisposed(), true);
 
-  // Calling methods after dispose throws error.
   assert.throws(() => layer.setTile(0, 0, 'stone'), /disposed/);
   assert.throws(() => layer.applyEdit({ col: 0, row: 0, cell: 'stone' }), /disposed/);
   assert.throws(() => layer.update(), /disposed/);
@@ -522,20 +500,16 @@ test('TileLayer dispose removes all registered nodes and rejects calls after dis
 test('boundary validation rejects invalid configuration and argument values', () => {
   const scene = new SpriteScene();
 
-  // Missing or empty id
   assert.throws(() => new TileLayer(scene, { id: '', cells: [] } as any), TypeError);
   assert.throws(() => new TileLayer(null as any, { id: 'x', cells: [] } as any), TypeError);
 
-  // Invalid dimensions
   assert.throws(() => new TileLayer(scene, { id: 'x', columns: 0, rows: 4, cells: [] }), RangeError);
   assert.throws(() => new TileLayer(scene, { id: 'x', columns: 4, rows: -1, cells: [] }), RangeError);
   assert.throws(() => new TileLayer(scene, { id: 'x', columns: 4, rows: 4, cellWidthMeters: -1, cells: [] }), RangeError);
   assert.throws(() => new TileLayer(scene, { id: 'x', columns: 4, rows: 4, originX: NaN, cells: [] }), TypeError);
 
-  // Insufficient cells
   assert.throws(() => new TileLayer(scene, { id: 'x', columns: 4, rows: 4, cells: [null] }), RangeError);
 
-  // Invalid palette entry
   assert.throws(
     () =>
       new TileLayer(scene, {
@@ -548,7 +522,6 @@ test('boundary validation rejects invalid configuration and argument values', ()
     TypeError,
   );
 
-  // Invalid grid contour input
   assert.throws(() => traceGridContours(null as any), TypeError);
   assert.throws(() => traceGridContours({ width: -1, height: 1, solidCells: [] }), RangeError);
   assert.throws(() => traceGridContours({ width: 2, height: 2, solidCells: [true] }), RangeError);
@@ -557,9 +530,6 @@ test('boundary validation rejects invalid configuration and argument values', ()
     RangeError,
   );
 
-  // Invalid helper arguments
-  assert.throws(() => build100TileFloorCase({ tileCount: 0 }), RangeError);
-  assert.throws(() => build100TileFloorCase({ tileSizeMeters: -5 }), RangeError);
   assert.throws(() => simplifyContourVertices(null as any), TypeError);
   assert.throws(() => computeSignedPolygonArea(null as any), TypeError);
 });

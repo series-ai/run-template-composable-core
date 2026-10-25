@@ -38,14 +38,6 @@ export interface CollisionGridInput {
   readonly solidCells: readonly (boolean | number | null | undefined)[];
 }
 
-export interface FloorSeamFixtureOptions {
-  readonly tileCount?: number;
-  readonly tileSizeMeters?: number;
-  readonly originX?: number;
-  readonly originY?: number;
-  readonly layerId?: string;
-}
-
 interface DirectedGridEdge {
   readonly startX: number;
   readonly startY: number;
@@ -360,57 +352,4 @@ export function buildTileContours(input: CollisionGridInput): TileCollisionPlan 
     totalVertices,
     bounds,
   };
-}
-
-/**
- * Build floor seam test case input with 100 adjacent tiles.
- */
-export function build100TileFloorCase(options?: FloorSeamFixtureOptions): CollisionGridInput {
-  const tileCount = options?.tileCount ?? 100;
-  if (!Number.isInteger(tileCount) || tileCount <= 0) {
-    throw new RangeError('build100TileFloorCase: tileCount must be a positive integer.');
-  }
-  const tileSize = options?.tileSizeMeters ?? 1.0;
-  if (!Number.isFinite(tileSize) || tileSize <= 0) {
-    throw new RangeError('build100TileFloorCase: tileSizeMeters must be a positive finite number.');
-  }
-  const originX = options?.originX ?? 0;
-  const originY = options?.originY ?? 0;
-  if (!Number.isFinite(originX) || !Number.isFinite(originY)) {
-    throw new TypeError('build100TileFloorCase: origin coordinates must be finite numbers.');
-  }
-  const layerId = options?.layerId ?? 'floor-100';
-
-  const solidCells = new Array<boolean>(tileCount).fill(true);
-
-  return {
-    layerId,
-    revision: 0,
-    width: tileCount,
-    height: 1,
-    tileSizeMeters: tileSize,
-    originX,
-    originY,
-    solidCells,
-  };
-}
-
-/**
- * Build floor seam test collision plan with 100 adjacent tiles.
- */
-export function build100TileFloorCollisionPlan(options?: FloorSeamFixtureOptions): TileCollisionPlan {
-  const gridInput = build100TileFloorCase(options);
-  return buildTileContours(gridInput);
-}
-
-/**
- * Create full 100 tile floor seam case fixture.
- */
-export function create100TileFloorFixture(options?: FloorSeamFixtureOptions): {
-  config: CollisionGridInput;
-  plan: TileCollisionPlan;
-} {
-  const config = build100TileFloorCase(options);
-  const plan = buildTileContours(config);
-  return { config, plan };
 }
