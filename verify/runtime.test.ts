@@ -1,12 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { existsSync } from 'node:fs';
 import type { GameApplication, StorageLike } from '../src/modules/runtime/game-application/types';
 import * as p2 from '@series-inc/rundot-syncplay/physics/2d';
 import * as p3 from '@series-inc/rundot-syncplay/physics/3d';
 
-const catalog = new URL('../../../modules/runtime/game-application/src/', import.meta.url);
-const source = existsSync(catalog) ? catalog : new URL('../src/modules/runtime/game-application/', import.meta.url);
+const source = new URL('../src/modules/runtime/game-application/', import.meta.url);
 const { createGameApplication } = await import(new URL('createGameApplication.ts', source).href);
 const { PersistenceJournal, computeChecksum } = await import(new URL('journal.ts', source).href);
 

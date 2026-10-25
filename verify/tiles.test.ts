@@ -1,10 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { existsSync } from 'node:fs';
 import * as p2 from '@series-inc/rundot-syncplay/physics/2d';
 
-const catalog = new URL('../../../modules/two-d/scene/src/', import.meta.url);
-const source = existsSync(catalog) ? catalog : new URL('../src/modules/two-d/scene/', import.meta.url);
+const source = new URL('../src/modules/two-d/scene/', import.meta.url);
 const { TileLayer } = await import(new URL('TileLayer.ts', source).href);
 const {
   buildTileContours,

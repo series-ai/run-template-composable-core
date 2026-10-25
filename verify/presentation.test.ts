@@ -1,15 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { existsSync } from 'node:fs';
 
-const catalog = new URL('../../../modules/two-d/scene/src/', import.meta.url);
-const source = existsSync(catalog) ? catalog : new URL('../src/modules/two-d/scene/', import.meta.url);
+const source = new URL('../src/modules/two-d/scene/', import.meta.url);
 const { ParticleEmitter } = await import(new URL('ParticleEmitter.ts', source).href);
 const { ParticleSprites } = await import(new URL('ParticleSprites.ts', source).href);
 const { SpriteScene } = await import(new URL('SpriteScene.ts', source).href);
 const { buildMultiTextureBatchRuns } = await import(new URL('batchRenderer.ts', source).href);
 const { resolveAnimationFrame } = await import(new URL('animation.ts', source).href);
-const runtimeSource = existsSync(catalog) ? new URL('../../../modules/runtime/game-application/src/', import.meta.url) : new URL('../src/modules/runtime/game-application/', import.meta.url);
+const runtimeSource = new URL('../src/modules/runtime/game-application/', import.meta.url);
 const { InputManager } = await import(new URL('input.ts', runtimeSource).href);
 
 test('ordered input edges retain duplicate commands through a checkpoint', () => {
