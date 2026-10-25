@@ -1,0 +1,640 @@
+/* ─── Portable Semantic Game Shell CSS ─────────────────────────────────────── */
+
+:root,
+[data-ui-theme='game-shell'] {
+  --game-shell-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --game-shell-bg: #090d16;
+  --game-shell-surface: #141c2e;
+  --game-shell-surface-raised: #1c273e;
+  --game-shell-border: rgba(255, 255, 255, 0.12);
+  --game-shell-border-strong: rgba(255, 255, 255, 0.24);
+  --game-shell-text: #f8fafc;
+  --game-shell-text-muted: #94a3b8;
+  --game-shell-primary: #38bdf8;
+  --game-shell-primary-hover: #0284c7;
+  --game-shell-primary-text: #041021;
+  --game-shell-secondary: #334155;
+  --game-shell-secondary-hover: #475569;
+  --game-shell-secondary-text: #f8fafc;
+  --game-shell-accent: #f59e0b;
+  --game-shell-success: #10b981;
+  --game-shell-error: #ef4444;
+  --game-shell-backdrop: rgba(4, 8, 16, 0.78);
+  --game-shell-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --game-shell-control-bg: rgba(20, 28, 46, 0.85);
+  --game-shell-control-border: rgba(255, 255, 255, 0.22);
+  --game-shell-control-active: rgba(56, 189, 248, 0.4);
+  --ui-focus-ring: #38bdf8;
+  --ui-geometry-touch-target-min: 44px;
+}
+
+/* Light theme overrides when data-color-scheme="light" */
+[data-color-scheme='light'] [data-ui-theme='game-shell'],
+[data-ui-theme='game-shell'][data-color-scheme='light'] {
+  --game-shell-bg: #f1f5f9;
+  --game-shell-surface: #ffffff;
+  --game-shell-surface-raised: #f8fafc;
+  --game-shell-border: rgba(0, 0, 0, 0.12);
+  --game-shell-border-strong: rgba(0, 0, 0, 0.24);
+  --game-shell-text: #0f172a;
+  --game-shell-text-muted: #64748b;
+  --game-shell-primary: #0284c7;
+  --game-shell-primary-hover: #0369a1;
+  --game-shell-primary-text: #ffffff;
+  --game-shell-secondary: #e2e8f0;
+  --game-shell-secondary-hover: #cbd5e1;
+  --game-shell-secondary-text: #0f172a;
+  --game-shell-backdrop: rgba(15, 23, 42, 0.6);
+  --game-shell-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --game-shell-control-bg: rgba(255, 255, 255, 0.85);
+  --game-shell-control-border: rgba(0, 0, 0, 0.2);
+  --game-shell-control-active: rgba(2, 132, 199, 0.25);
+  --ui-focus-ring: #0284c7;
+}
+
+/* ─── Root Shell Layout ──────────────────────────────────────────────────────── */
+
+.game-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: var(--game-shell-font);
+  color: var(--game-shell-text);
+  background: var(--game-shell-bg);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-shell * {
+  box-sizing: border-box;
+}
+
+.game-shell__world {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.game-shell__screen-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--game-shell-backdrop);
+  pointer-events: auto;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────────── */
+
+.ui-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ui-geometry-touch-target-min);
+  min-width: var(--ui-geometry-touch-target-min);
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.08s ease, filter 0.08s ease, background 0.15s ease;
+  pointer-events: auto;
+}
+
+.ui-button:focus-visible {
+  outline: 3px solid var(--ui-focus-ring);
+  outline-offset: 2px;
+}
+
+.ui-button:active:not([disabled]) {
+  transform: scale(0.97);
+}
+
+.ui-button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ui-button[data-variant='primary'] {
+  background: var(--game-shell-primary);
+  color: var(--game-shell-primary-text);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+.ui-button[data-variant='primary']:hover:not([disabled]) {
+  filter: brightness(1.08);
+}
+
+.ui-button[data-variant='secondary'] {
+  background: var(--game-shell-secondary);
+  color: var(--game-shell-secondary-text);
+  border-color: var(--game-shell-border);
+}
+
+.ui-button[data-variant='secondary']:hover:not([disabled]) {
+  background: var(--game-shell-secondary-hover);
+}
+
+.ui-button[data-variant='ghost'] {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--game-shell-text);
+  border-color: var(--game-shell-border);
+}
+
+.ui-button[data-variant='ghost']:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.ui-button[data-size='hero'] {
+  min-height: 56px;
+  padding: 14px 28px;
+  font-size: 18px;
+  border-radius: 14px;
+}
+
+.ui-button[data-size='compact'] {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.ui-button[data-icon-only='true'] {
+  padding: 0;
+  width: var(--ui-geometry-touch-target-min);
+  height: var(--ui-geometry-touch-target-min);
+}
+
+/* ─── Panels & Dialogs ───────────────────────────────────────────────────────── */
+
+.ui-panel {
+  position: relative;
+  background: var(--game-shell-surface);
+  border: 1px solid var(--game-shell-border);
+  border-radius: 18px;
+  color: var(--game-shell-text);
+  box-shadow: var(--game-shell-shadow);
+  padding: 20px;
+  overflow: hidden;
+}
+
+.ui-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--game-shell-border);
+  padding-bottom: 12px;
+}
+
+.ui-panel__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--game-shell-text);
+}
+
+.ui-panel__subtitle {
+  font-size: 13px;
+  color: var(--game-shell-text-muted);
+  margin-top: 2px;
+}
+
+.ui-dialog__body {
+  padding: 8px 0;
+}
+
+/* ─── HUD ────────────────────────────────────────────────────────────────────── */
+
+.game-shell__hud-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid var(--game-shell-border);
+  border-radius: 10px;
+  padding: 6px 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.game-shell__stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--game-shell-text-muted);
+}
+
+.game-shell__stat-value {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--game-shell-text);
+}
+
+.game-shell__hud-objective {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid var(--game-shell-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--game-shell-text);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.game-shell__hud-notice {
+  background: var(--game-shell-accent);
+  color: #1a1300;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  max-width: 320px;
+  text-align: center;
+}
+
+/* ─── Progress Bar ───────────────────────────────────────────────────────────── */
+
+.ui-progress {
+  width: 100%;
+}
+
+.ui-progress__track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ui-progress__fill-clip {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.ui-progress__fill {
+  width: var(--ui-progress-percent, 0%);
+  height: 100%;
+  background: var(--game-shell-primary);
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+/* ─── Form Controls & Switches ───────────────────────────────────────────────── */
+
+.ui-control--switch {
+  display: block;
+  min-height: var(--ui-geometry-touch-target-min);
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.ui-control__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.ui-control__label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ui-control__label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--game-shell-text);
+}
+
+.ui-control__hint {
+  font-size: 12px;
+  color: var(--game-shell-text-muted);
+}
+
+.ui-control__native {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.ui-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  border: 1px solid var(--game-shell-border);
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ui-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ui-control__native:checked + .ui-switch {
+  background: var(--game-shell-primary);
+}
+
+.ui-control__native:checked + .ui-switch .ui-switch__thumb {
+  transform: translateX(20px);
+}
+
+.ui-control__native:focus-visible + .ui-switch {
+  outline: 3px solid var(--ui-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ─── Spinner & State Panels ─────────────────────────────────────────────────── */
+
+.ui-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3.5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--game-shell-primary);
+  border-radius: 50%;
+  animation: game-shell-spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes game-shell-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ui-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.ui-state-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.ui-state-message {
+  margin: 0;
+  font-size: 14px;
+  color: var(--game-shell-text-muted);
+  line-height: 1.5;
+}
+
+.ui-state-actions {
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* ─── Touch Controls ─────────────────────────────────────────────────────────── */
+
+.game-shell__touch-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  z-index: 50;
+}
+
+.game-shell__touch-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(3, 52px);
+  gap: 4px;
+  align-items: center;
+  justify-items: center;
+  pointer-events: none;
+}
+
+.game-shell__touch-dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.game-shell__touch-dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.game-shell__touch-dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.game-shell__touch-dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.game-shell__touch-actions {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.game-shell__touch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  min-height: 52px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--game-shell-control-bg);
+  border: 2px solid var(--game-shell-control-border);
+  color: var(--game-shell-text);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  transition: transform 0.05s ease, background 0.05s ease;
+}
+
+.game-shell__touch-btn:active:not([disabled]) {
+  background: var(--game-shell-control-active);
+  transform: scale(0.93);
+}
+
+.game-shell__touch-action-btn {
+  min-width: 58px;
+  min-height: 58px;
+  width: 58px;
+  height: 58px;
+}
+
+.game-shell__touch-action-btn[data-tone='primary'] {
+  border-color: var(--game-shell-primary);
+  color: var(--game-shell-primary);
+}
+
+.game-shell__touch-action-btn[data-tone='secondary'] {
+  border-color: var(--game-shell-accent);
+  color: var(--game-shell-accent);
+}
+
+/* ─── Results and Badges ─────────────────────────────────────────────────────── */
+
+.game-shell__results-scores {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+
+.game-shell__score-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--game-shell-border);
+  border-radius: 12px;
+}
+
+.game-shell__score-display {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--game-shell-primary);
+}
+
+.game-shell__new-best-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--game-shell-accent);
+  color: #1a1300;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+.game-shell__notice-banner {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: var(--game-shell-accent);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+}
+
+.game-shell__muted-text {
+  color: var(--game-shell-text-muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+.game-shell__help-item {
+  color: var(--game-shell-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ─── Responsive Adjustments ─────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .game-shell__hud-stats {
+    gap: 6px;
+  }
+  .game-shell__hud-stat {
+    padding: 4px 8px;
+  }
+  .game-shell__stat-value {
+    font-size: 14px;
+  }
+  .game-shell__hud-top-row {
+    flex-wrap: wrap;
+  }
+  .game-shell__touch-btn {
+    min-width: 48px;
+    min-height: 48px;
+    width: 48px;
+    height: 48px;
+  }
+  .game-shell__touch-action-btn {
+    min-width: 54px;
+    min-height: 54px;
+    width: 54px;
+    height: 54px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .game-shell__hud {
+    padding: 20px 32px;
+  }
+  .game-shell__stat-value {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .game-shell__touch-controls { display: none; }
+}

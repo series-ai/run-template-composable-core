@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "module": "two-d/scene",
+  "upstream": {
+    "repository": "game-bot",
+    "commit": "dec2286bcdf1da4c2a5394cdf8e7ef6043ceb005",
+    "sourceState": "working-tree",
+    "note": "Source hashes identify the inspected files. The upstream checkout has local changes."
+  },
+  "sources": [
+    {
+      "sourcePath": "modules/two-d/atlas-registry/src/AtlasRegistry.ts",
+      "sha256": "f81283c1bdc5b65e87dc14d2eea240453468f84bd2613bb91d7cd145858a89fc",
+      "adaptations": "Adapted AtlasRegion and AtlasManifest. Added strict boundary validation, packed cw90 rotation support, trimmed source rect offsets, 9-slice metadata, and finite number checks. Removed unvalidated object lookups."
+    },
+    {
+      "sourcePath": "modules/two-d/sprite-animation/src/SpriteAnimation.ts",
+      "sha256": "f91977c5d40baa6a98c924478060c3252e72e8cc1c6d8ebcfb6239597441b704",
+      "adaptations": "Adapted frame resolution math. Replaced unvalidated state.clock dependency with an injected active presentation clock. Added durationMs per frame, timeline tick conversion, and separated cosmetic clip events from gameplay timelines."
+    },
+    {
+      "sourcePath": "modules/two-d/sprite-batch/src/SpriteBatch.ts",
+      "sha256": "8c34bb3f2b8c8b380fef69e515225019edf6662965432a7249ebf706ddef3c70",
+      "adaptations": "Replaced per-atlas bucketing that broke global transparent ordering. Implemented multi-texture batching (up to 4 atlas samplers per run) that preserves global interleaved draw order across atlases and foreign layer boundaries. Replaced localeCompare with fixed-codepoint sorting."
+    },
+    {
+      "sourcePath": "modules/two-d/world-sort/src/WorldSort.ts",
+      "sha256": "acb8a20040576824759105f41f2abb4e525fd05c2734daec74b5580ddf5f2f62",
+      "adaptations": "Adapted global Y-sorting. Replaced raw ascending Y with foot anchor depthKey = -footWorldY. Replaced localeCompare with deterministic fixed-codepoint comparison. Integrated layer rank and sub-band ordering."
+    },
+    {
+      "sourcePath": "modules/two-d/orthographic-stage/src/OrthographicStage.ts",
+      "sha256": "a4e39fb077f24a82522a5af512c2af2e5f625bfb39f7737e70917c8179988eb8",
+      "adaptations": "Adapted orthographic frustum, pixel snap, and content-fit math. Added camera follow with deadzone and smoothing. Integrated DPR scaling."
+    },
+    {
+      "sourcePath": "modules/two-d/parallax-layer/src/ParallaxLayer.ts",
+      "sha256": "1a00323af9a18dd20422390c7aefaaa2dfaf567a6712b74e24b6414321bad320",
+      "adaptations": "Adapted 2D parallax offset formula. Preserved factorX/factorY math with explicit camera offset origin."
+    },
+    {
+      "sourcePath": "modules/two-d/tilemap-layer/src/TilemapLayer.ts",
+      "sha256": "db97c491c3f3ffc24d3eff4a7b5614fab3f7ba373c9b3fd8c9a8c8c19a58bbc3",
+      "adaptations": "Adapted tile chunk partition logic. Added horizontal, vertical, and diagonal flip flags, animated tile frames, frustum culling per chunk, and mutable tile edit revisions."
+    },
+    {
+      "sourcePath": "modules/two-d/tilemap-collision/src/TilemapCollision.ts",
+      "sha256": "4edfb5c8e4956133fdb7880481d8d5d189acce95f4a6b6e5ad61e2f3bc6b9100",
+      "adaptations": "Replaced rectangle merge output with closed boundary contours. Internal edges are removed. The caller creates Syncplay chain shapes."
+    },
+    {
+      "sourcePath": "modules/sprite/renderer/src/SpriteRenderer.tsx",
+      "sha256": "21a5d04e1317bef92df7372b11900e0c7dcb94472d67e12eb46a31b989bfd574",
+      "adaptations": "Eliminated per-actor Texture.clone() calls. Replaced single-mesh per actor with shared instanced geometry. Removed state.clock.elapsedTime fallback in favor of explicit injected clock. Replaced React state updates per frame with imperative scene calls."
+    },
+    {
+      "sourcePath": "modules/sprite/plist-parser/src/PlistParser.ts",
+      "sha256": "04db232bd0cabdda1fe8437b545dedddc9b212012c2ee3ce9e383bd4971d6720",
+      "adaptations": "Adapted Cocos2d TexturePacker format 2 XML parsing. Preserves rotated (cw90), offset, and sourceSize fields. Validates all inputs to finite values."
+    },
+    {
+      "sourcePath": "modules/sprite/sheet-config/src/SheetParser.ts",
+      "sha256": "06545057059fb64ac42eb79ffb3ba6ff0d827bf3ddb461a063d3f52461ed193c",
+      "adaptations": "Adapted uniform grid spritesheet UV calculations into canonical AtlasManifest format."
+    },
+    {
+      "sourcePath": "modules/asset-shared/asset-plist-atlas/src/PlistAtlasParser.ts",
+      "sha256": "ae4d9b6ae8ab96a7e9a4e3261cdbd3fc72b9cd1a96128b49aa7b96f25cebe7fd",
+      "adaptations": "Integrated into parsePlistAtlasManifest. Corrected Cocos2d Y offset orientation and rotated dimension mapping."
+    },
+    {
+      "sourcePath": "kits/platformer/interaction-harness/src/render/SpriteBatchView.tsx",
+      "sha256": "35ac90f3c3aa5b51b3fc2a40ae5ddb8c2cf0aebef251d2adea94cfa7e50b066d",
+      "adaptations": "Replaced individual mesh-per-actor and cropped texture clones with shared instanced multi-texture rendering on Three.js instanced meshes. Bound monotonic renderOrder."
+    },
+    {
+      "sourcePath": "projects/lattice/src/engine/arena/Particles.ts",
+      "sha256": "270c92a8647be0f2bb71a9af9ecc35908786603161bd0741981d4d043ac4b578",
+      "adaptations": "Reused cosmetic motion and burst formulas. Added bounded pools, active clocks, event keys, shared sprite output, and a fixed-band 3D view."
+    },
+    {
+      "sourcePath": "projects/ashfall-watch/src/modules/juice/particle-burst/ParticleBurst.ts",
+      "sha256": "8989e36d466008f3a9cdd376233adc1a6177f6ec2bc816aebd6df02c0a092bae",
+      "adaptations": "Reused cosmetic motion and burst formulas. Added bounded pools, active clocks, event keys, shared sprite output, and a fixed-band 3D view."
+    },
+    {
+      "sourcePath": "projects/ashfall-watch/src/modules/juice/particle-renderer/ParticleRenderer.tsx",
+      "sha256": "65555eba4cf8d31fac816e68c9b7e68bf3df745bb9520f4210939f2eacb4abea",
+      "adaptations": "Reused cosmetic motion and burst formulas. Added bounded pools, active clocks, event keys, shared sprite output, and a fixed-band 3D view."
+    },
+    {
+      "sourcePath": "projects/ashfall-watch/src/renderer/effects/ParticleLayer.tsx",
+      "sha256": "6e75a80e2356b10e101c4099299d7fc850ee91bab5e46e626ea5f163eecb5a22",
+      "adaptations": "Reused cosmetic motion and burst formulas. Added bounded pools, active clocks, event keys, shared sprite output, and a fixed-band 3D view."
+    }
+  ]
+}

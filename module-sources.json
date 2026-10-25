@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "modules": {
+    "runtime/game-application": {
+      "source": "modules/runtime/game-application",
+      "files": {
+        "adapter2d.ts": "b86882ab9f3e2cade7da8e50a3cfa001c0e78a34e99a88b310eabd0f022154e3",
+        "adapter3d.ts": "92e88cceed6e41d3b8f62a9724680eaaa65108d4ac3019924b3462648dd2c89f",
+        "checkpoint.ts": "1c5ed903c2fd43f6d2f930abae1275853bb60d1394c86305ed6fd509820d2b5f",
+        "createGameApplication.ts": "e624d241de94fe34debb8022370d9914b5fa9b2aa7dd8a7a1d82f8bf415b6239",
+        "input.ts": "8e61b91ec65364abc55e52a63f10ea66ee1634925f785c00fc4b8169ce995b74",
+        "journal.ts": "f8ac513a04e0e6a2afb78d33ed40f6ec2b1be9df0b4f35896d02f87ff53ce25c",
+        "runtime.ts": "ce5086beaa6aafd7ee8c3c506dfb006a2c8bd5f4b80b657a41f40ab695aec8c8",
+        "scene.ts": "092f0fe011ef99049e9de32ef72dc66440c3a9608fc91046e107fa2e14415199",
+        "store.ts": "073cfca41466c01f47891437e005b655230dbf1bdcbbb70f3cfa4fb89b8ffb76",
+        "types.ts": "bca438d6873bf7cd4be637e924bf2fd6f53f39ed4336bcbb5560c522d981e57f",
+        "SKILL.md": "a2118b61b19bf9e9f8e5f424d108d606aa4910c67a38745fc7e9e88b92bb0039",
+        "provenance.json": "d7669f9d81e9403fad140ac2cc8613606e13c0c63fa30d56a43c032b6878bdb5"
+      }
+    },
+    "two-d/scene": {
+      "source": "modules/two-d/scene",
+      "files": {
+        "ParticleEmitter.ts": "e3b75deb97f962a53c3792f898321fff949ae73aa1ca9d13a164690bee86855e",
+        "ParticleSprites.ts": "fde2f007b46c007dbd6eb367d96e03f1f4928e2df876316eaf5acacca08be0f0",
+        "ParticleView.tsx": "331fa92bc5cad84411ae85c600f410f8f06714e0477966a6040712895b511f09",
+        "Sprite2D.tsx": "7d6f7afc98aa42bffd09baf2357f0954137ce6bd72bef1adc2aedfff7134eb53",
+        "SpriteBatchView.tsx": "be53e14281d495aee8ffbf5487f78f943ed5dc69553ad86c284aa477bb427751",
+        "SpriteGroup.tsx": "0fda50ddc8459f446a3723060daa66e8e22867675a340f073a2ef524fd3694ac",
+        "SpriteScene.ts": "683fb894e2629b418eb57b2dd4d1cba9b39b8550ce6f5e2c438bbbc64050c64a",
+        "TileLayer.ts": "9977013cc8f30efed2896936c9be7be3d49ad6bb73045bbfd78ed8ff313f998d",
+        "animation.ts": "3a1ec6e82d8c5ae882b0efbf4f7ddb4be37268bd184e6eed5bf238d3898514c6",
+        "atlasManifest.ts": "f728e170f964166ac99f3146fb416a9c6146740fdef6f68cf14c328203c9f280",
+        "atlasTextures.ts": "b8f705b56c726f8351ca48f47226b7dcdfe3d97d0fb47ee7c219f2ec0ed392cb",
+        "batchRenderer.ts": "9a63d0436406368f422a2e97faffcd6c4a37bce2e75b32e079792cbc8f00601b",
+        "camera.ts": "cb7ccfa689ad3c8977f3faa4ab01f574b6141d10f836ea11b21dd3d77f792c7b",
+        "fixedCodepointSort.ts": "baf6bcd617054fb6e871799334021bbba11f25d4459368dc00d3ef2d89ff571e",
+        "materials.ts": "6d1c6f30820fb3e7d6f8f33d93e1a0b0ae168d14ed766fe75e4a56bf1e0aa8a2",
+        "tileContours.ts": "0c9cdc78ab1c9df78d30760125865d4c87063bba3bd14418c90e93a2f876f724",
+        "tilemap.ts": "fe535aad2d2986bfe132cc3bb5c1a973d60839302a9ccf1d697b76cda7713f8f",
+        "types.ts": "41b7628ea8bee0d056be60a7aa9c34cb71ba778827e76b4c806a30e45c515901",
+        "SKILL.md": "33aaa6a4788ed622469984f77427fb4977895a634e2d46dd67975da941596503",
+        "provenance.json": "76d8bc4f815f15900e9b66143938d30d73c5c2fc00fec03a34afd83e49d5d5fc"
+      }
+    },
+    "two-d/graphics": {
+      "source": "modules/two-d/graphics",
+      "files": {
+        "bitmapText.ts": "8a99c57cc706130301795ad42b4d9d7d5e801e4ddeda50c54dd93b50f8faabc9",
+        "color.ts": "546371830135e02cce545a73e4355298519a7598f5a4f991a7b50a5680b48f1c",
+        "foreignAdapter.ts": "c44044a2feabf02130944f4889820622c59e7e6f3f0e3431022f5c6728af1ec5",
+        "masks.ts": "6b94815c1eda0f7cf399f60851471fa4960f9f89f4613e9a6f5ae005be58d35f",
+        "materials.ts": "1d7bd80b82b08256d566506fda5e1d7d6df2c011b6bd1ebfc3103396f6105e8f",
+        "nineSlice.ts": "355cbd0ccbff4e4e1e1d6b2941746d308fa6c10a34790870597a81d55c0e14a6",
+        "offscreenCompositor.ts": "2dd614224ec1df70eac2cb5e1e470ad4331f6505dd530b9075eccf4d770ac277",
+        "resourceScope.ts": "46db38b8039870157b2abc0d60f95eb56dfdad743c085c023b6c492650c885e3",
+        "sceneBinding.ts": "9869c2f03573bb4610271e1d198e766ec408f4366ec6e5fcdabf3b36fff4d847",
+        "types.ts": "cbb49ce725195cfd4da7233ad3396df4559cb416aceb0e53d9aac22f6d1bd5b2",
+        "vectorGeometry.ts": "5d4e536b3f41bdbbca37be08c50ca3e5977f9caca3ab8f6077f423b1ef9d9852",
+        "vectorMesh.ts": "ba65ba028899aa10896034fb2d1967a4b302d665ec64b16933dc8008735ea0a9",
+        "SKILL.md": "4cff64c03ec97ec4cd44f03a55074ce18acf34d94b3ca443b2d3892131dc9bfe",
+        "provenance.json": "1a3fb20d205cf59108cb7cea3260caf1970c0a706e203a2b11e4fc687f4cc6e1"
+      }
+    },
+    "ui/game-shell": {
+      "source": "modules/ui/game-shell",
+      "files": {
+        "GameShell.tsx": "555fca6e464c019289e1d0dfc7f04d9e3e1848eb4d95800919e7626bd4754888",
+        "GameShellHelpDialog.tsx": "0eb38ec57d80af3a6103bed48b17c4e9605361483f4b5e15244d34cd667e3060",
+        "GameShellHud.tsx": "5a5aa0b066499573c7603c69878c5fbf15d7dc52d965a1e7083ce99b7e46d8aa",
+        "GameShellPauseMenu.tsx": "a0e353907622571536a1f4cedd45e41ca69788540a30a10fe3d9f0072211e281",
+        "GameShellResultsOverlay.tsx": "53b4691974cbe2a2ae051e0cf85aa11084dc57fb62f21c04f3c522fafe5f9b50",
+        "GameShellSettingsDialog.tsx": "bde995a5c088913d989d7989c2098fece7f14fec90ebd6214e10735ed7b12ca4",
+        "GameShellStartOverlay.tsx": "dc50e2a3e3cb9394ed7ab2e228f7f312a87399aa59405b5d19904fe03e69f872",
+        "GameShellStore.ts": "4384a50cb39004ddc95f64b4bed19c54cb28126936d7285993017a5f528c9be4",
+        "SkinButton.tsx": "2871aa0d01430dc4ba2802c07ef8d59a96355da1125d018b1369fb367e4b257c",
+        "SkinDialog.tsx": "f81e77f82153c21bb9fae4c9323cf6295d393deac415d971147510338ffa92bf",
+        "SkinIcon.tsx": "bbcbc62e3b2ec9b5b1a435f0e02ca91c465e32d60f8109af84db5bfd5eadf97b",
+        "SkinPanel.tsx": "5b594bef385ff423dcf7a6cf22ad8d7ee8d0a701bec0fa74e5f933e142a5672b",
+        "SkinProgress.tsx": "47ab77ba4792cc4c6e8227d0b6a568ea8b89c1a034976ee8f1c9344f7c1b0120",
+        "SkinState.tsx": "fe5e641c178b130b89c86a7c220827ba8d2c046b0cc02d2fd6f7684bed88008d",
+        "SkinSwitch.tsx": "16e92e9395ec1b50afaf81f74ff790def84c06555b7f2e8d2d9a9b45f28c4642",
+        "VirtualTouchControls.tsx": "54bcfb61c8fa6df45971b05e6d9b5499e140cb6ce32e358d47f6331f1bcd543a",
+        "classNames.ts": "c4a71b3c4a5a75b4c4b624db6f4b235e6ee207a85cc775966dc72a9961635639",
+        "game-shell.css": "e6fa6a3c7cb5bfec1dd578670b21807527065ae3821a161f9a3ac96019ed4949",
+        "types.ts": "37752e1294aa53743d0c94d49e14e7c6c751f3c4ef40a085e41164c5fe5fdc5f",
+        "useDismissOnEscape.ts": "d18bce94dbec71cd1fb15dd9cf53e56cf44bab2106f82467ca77d08b7188a05e",
+        "useFocusTrap.ts": "1c45f73579e3c995a4c6dfa946b442cec1b3e2fd23a81fe14488ddcd25720ff5",
+        "SKILL.md": "b571eb98a41e1b2ad47655d0a48b75584610b487b0173c569042e5c7e487d9c9",
+        "provenance.json": "e4504fc744c2416c915f62c1c1095d200162e655d7300d7df43c3203a13e3535"
+      }
+    }
+  }
+}
