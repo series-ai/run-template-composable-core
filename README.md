@@ -1,6 +1,6 @@
 # Modules template
 
-This starter uses React 19, R3F 9, Three, and Syncplay 6.0.0-rc.66.
+This starter uses React 19, R3F 9, Three, and Syncplay 6.0.0-rc.70.
 Select Play to start the 2D collection game.
 Select Switch to 3D to play the 3D collection game.
 Both games use real Syncplay physics.

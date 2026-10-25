@@ -85,7 +85,7 @@ export class WorldAdapter2D {
     this.world = world;
     this.scene = scene;
     const info = world.info();
-    this.runtimeIdentity = `@series-inc/rundot-syncplay@6.0.0-rc.66:2d:artifact=49cb90541deed40f5fff1015bb578e13ec9a793d51931c1227e3e5a11bbfa3f7:abi=${info.worldAbiVersion}:tickRate=${info.tickRate}:dt=${info.fixedDt}:substeps=${info.substeps}:iterations=${info.velocityIterations}:scene=${computeChecksum(JSON.stringify(scene))}:rules=v1:schema=v${CURRENT_CHECKPOINT_VERSION}`;
+    this.runtimeIdentity = `@series-inc/rundot-syncplay@6.0.0-rc.70:2d:artifact=49cb90541deed40f5fff1015bb578e13ec9a793d51931c1227e3e5a11bbfa3f7:abi=${info.worldAbiVersion}:tickRate=${info.tickRate}:dt=${info.fixedDt}:substeps=${info.substeps}:iterations=${info.velocityIterations}:scene=${computeChecksum(JSON.stringify(scene))}:rules=v1:schema=v${CURRENT_CHECKPOINT_VERSION}`;
   }
 
   static async create(scene: SceneDefinition2D = REFERENCE_SCENE_2D): Promise<WorldAdapter2D> {

@@ -4,8 +4,8 @@
     "runtime/game-application": {
       "source": "modules/runtime/game-application",
       "files": {
-        "adapter2d.ts": "b86882ab9f3e2cade7da8e50a3cfa001c0e78a34e99a88b310eabd0f022154e3",
-        "adapter3d.ts": "92e88cceed6e41d3b8f62a9724680eaaa65108d4ac3019924b3462648dd2c89f",
+        "adapter2d.ts": "d3fd28dd901cd9b0ff1e459f02b9e089bb18645f8913617631895129778af10f",
+        "adapter3d.ts": "6df3e3e557708b6934d1d2dd5627895197f44697e6187373f5f40300b5dfd303",
         "checkpoint.ts": "1c5ed903c2fd43f6d2f930abae1275853bb60d1394c86305ed6fd509820d2b5f",
         "createGameApplication.ts": "e624d241de94fe34debb8022370d9914b5fa9b2aa7dd8a7a1d82f8bf415b6239",
         "input.ts": "8e61b91ec65364abc55e52a63f10ea66ee1634925f785c00fc4b8169ce995b74",

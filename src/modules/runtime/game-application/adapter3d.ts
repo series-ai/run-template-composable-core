@@ -63,7 +63,7 @@ export class WorldAdapter3D {
     this.world = world;
     this.scene = scene;
     const info = world.info();
-    this.runtimeIdentity = `@series-inc/rundot-syncplay@6.0.0-rc.66:3d:abi=${info.worldAbiVersion}:digestRev=${info.digestAlgorithmRevision}:artifact=${info.artifactHash}:tickRate=${info.tickRate}:dt=${info.fixedDt}:substeps=${info.substeps}:iterations=${info.velocityIterations}:scene=${computeChecksum(JSON.stringify(scene))}:rules=v1:schema=v${CURRENT_CHECKPOINT_VERSION}`;
+    this.runtimeIdentity = `@series-inc/rundot-syncplay@6.0.0-rc.70:3d:abi=${info.worldAbiVersion}:digestRev=${info.digestAlgorithmRevision}:artifact=${info.artifactHash}:tickRate=${info.tickRate}:dt=${info.fixedDt}:substeps=${info.substeps}:iterations=${info.velocityIterations}:scene=${computeChecksum(JSON.stringify(scene))}:rules=v1:schema=v${CURRENT_CHECKPOINT_VERSION}`;
   }
 
   static async create(scene: SceneDefinition3D = REFERENCE_SCENE_3D): Promise<WorldAdapter3D> {
