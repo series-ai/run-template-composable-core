@@ -37,6 +37,10 @@ The gamepad mapping still needs a physical device check.
 
 The SDK storage adapter stores settings and best scores separately from round resumes.
 Each dimension has its own resume record.
+Restored rounds wait for the player to select Resume.
+The game saves on pause, collection, settings changes, and when the page becomes hidden.
+SDK storage writes are asynchronous. A hard reload can interrupt an unfinished write.
+The pagehide save is best effort. It does not guarantee the latest round state.
 The browser build uses the SDK local host when no RUN host is present.
 This does not verify the deployed host or cloud storage.
 

@@ -32,7 +32,10 @@ export class StarterApplication {
   readonly getView = (): GameShellView => this.view;
   readonly actions: GameShellActions = {
     start: () => { this.unlockAudio(); this.game?.start(); },
-    pause: () => this.game?.pause(),
+    pause: () => {
+      this.game?.pause();
+      void this.game?.save().catch(console.warn);
+    },
     resume: () => { this.unlockAudio(); this.game?.resume(); },
     restart: () => { this.unlockAudio(); this.game?.restart(); this.game?.start(); },
     retry: () => { void this.load(this.view.dimension); },
@@ -44,7 +47,15 @@ export class StarterApplication {
     setSettings: (settings: Partial<GameSettings>) => {
       this.game?.setSettings(settings); void this.game?.save().catch(console.warn);
     },
-    setMenuOpen: (open) => { if (open) this.clearInput(); this.setSuspended('ui-menu', open); },
+    setMenuOpen: (open) => {
+      if (open) this.clearInput();
+      this.setSuspended('ui-menu', open);
+      if (!open && this.view.status === 'running') {
+        requestAnimationFrame(() => {
+          document.querySelector('canvas')?.focus({ preventScroll: true });
+        });
+      }
+    },
   };
 
   async load(dimension: Dimension): Promise<void> {
@@ -67,6 +78,7 @@ export class StarterApplication {
       next = await createGameApplication({ dimension, storage: this.storageAdapter, gameId: 'modules-starter' });
       await next.restore();
       if (this.disposed || generation !== this.generation) { next.dispose(); return; }
+      if (next.getView().status === 'running') next.pause();
       this.game = next;
       next.setSuspended('hidden', document.hidden);
       for (const cause of this.suspensionCauses) next.setSuspended(cause, true);
@@ -87,7 +99,10 @@ export class StarterApplication {
             gravity: -3, colors: ['#ffd36c', '#f4efe8'], eventKey: `${frame.epoch}:${pair.entityId}` });
         }
         if (frame.poses.every((pair) => pair.visible)) collected.clear();
-        if (view.score > previousScore && view.settings.sound) this.playReward();
+        if (view.score > previousScore) {
+          if (view.settings.sound) this.playReward();
+          void next.save().catch(console.warn);
+        }
         previousScore = view.score;
         if (view.status === 'results' && previousStatus !== 'results') void next.save().catch(console.warn);
         previousStatus = view.status;
@@ -127,7 +142,10 @@ export class StarterApplication {
     };
     const blur = (): void => { release(); this.setSuspended('focus', true); };
     const focus = (): void => { this.setSuspended('focus', false); };
-    const visibility = (): void => { release(); this.setSuspended('hidden', document.hidden); };
+    const visibility = (): void => {
+      release(); this.setSuspended('hidden', document.hidden);
+      if (document.hidden) void this.game?.save().catch(console.warn);
+    };
     const save = (): void => { release(); void this.game?.save().catch((error: unknown) => console.warn('Progress could not be saved.', error)); };
     target.addEventListener('keydown', keydown); target.addEventListener('keyup', keyup);
     target.addEventListener('blur', blur); target.addEventListener('focus', focus);

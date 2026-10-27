@@ -13,6 +13,46 @@ import ParticleView from '../modules/two-d/scene/ParticleView';
 const definitions2d = new Map(REFERENCE_SCENE_2D.entities.map((entity) => [entity.id, entity]));
 const definitions3d = new Map(REFERENCE_SCENE_3D.entities.map((entity) => [entity.id, entity]));
 
+const CAMERA_3D_DIR = new THREE.Vector3(11, 13, 16).normalize();
+const ORB_BOUNDING_SPHERE = (() => {
+  const points: THREE.Vector3[] = [];
+  for (const entity of REFERENCE_SCENE_3D.entities) {
+    if (entity.render.role === 'orb') {
+      const radius = entity.render.size[0] / 2;
+      const [x, y, z] = entity.position;
+      points.push(
+        new THREE.Vector3(x + radius, y, z),
+        new THREE.Vector3(x - radius, y, z),
+        new THREE.Vector3(x, y + radius, z),
+        new THREE.Vector3(x, y - radius, z),
+        new THREE.Vector3(x, y, z + radius),
+        new THREE.Vector3(x, y, z - radius),
+      );
+    }
+  }
+  return new THREE.Sphere().setFromPoints(points);
+})();
+const STATIC_FIT_SPHERE = new THREE.Sphere();
+
+function fitCamera3D(
+  camera: THREE.PerspectiveCamera,
+  aspect: number,
+  playerPos?: THREE.Vector3,
+  targetSphere?: THREE.Sphere,
+): void {
+  const sphere = targetSphere ?? STATIC_FIT_SPHERE;
+  sphere.copy(ORB_BOUNDING_SPHERE);
+  if (playerPos) sphere.expandByPoint(playerPos);
+  const vFovRad = (camera.fov * Math.PI) / 180;
+  const vHalfFov = vFovRad / 2;
+  const hHalfFov = Math.atan(aspect * Math.tan(vHalfFov));
+  const minHalfFov = Math.min(vHalfFov, hHalfFov);
+  const radiusWithMargin = (sphere.radius + 0.4) * 1.1;
+  const dist = radiusWithMargin / Math.sin(minHalfFov);
+  camera.position.copy(sphere.center).addScaledVector(CAMERA_3D_DIR, dist);
+  camera.lookAt(sphere.center);
+}
+
 function CameraRig({ dimension }: { dimension: '2d' | '3d' }) {
   const { camera, size } = useThree();
   useEffect(() => {
@@ -22,7 +62,12 @@ function CameraRig({ dimension }: { dimension: '2d' | '3d' }) {
       camera.left = -worldHeight * aspect / 2; camera.right = worldHeight * aspect / 2;
       camera.top = worldHeight / 2; camera.bottom = -worldHeight / 2;
       camera.position.set(1, 3.5, 20); camera.updateProjectionMatrix();
-    } else { camera.position.set(11, 13, 16); camera.lookAt(0, 0, 0); }
+    } else if (camera instanceof THREE.PerspectiveCamera) {
+      const aspect = size.width / Math.max(1, size.height);
+      camera.aspect = aspect;
+      fitCamera3D(camera, aspect);
+      camera.updateProjectionMatrix();
+    }
   }, [camera, size, dimension]);
   return null;
 }
@@ -30,8 +75,10 @@ function CameraRig({ dimension }: { dimension: '2d' | '3d' }) {
 function FrameBridge({ application, scene, clock, meshes, particles }: {
   application: StarterApplication; scene?: SpriteScene; clock: PresentationClock; meshes?: Map<string, THREE.Mesh>; particles?: { current: ParticleSprites | null };
 }) {
-  const { gl, camera } = useThree(); const quaternion = useMemo(() => new THREE.Quaternion(), []);
+  const { gl, camera, size } = useThree(); const quaternion = useMemo(() => new THREE.Quaternion(), []);
   const position = useMemo(() => new THREE.Vector3(), []);
+  const frameSphere = useMemo(() => new THREE.Sphere(), []);
+  const playerPosition = useMemo(() => new THREE.Vector3(), []);
   useEffect(() => {
     const loss = (event: Event): void => { event.preventDefault(); application.game?.setSuspended('context-lost', true); };
     const restore = (): void => { application.game?.setSuspended('context-lost', false); };
@@ -59,6 +106,21 @@ function FrameBridge({ application, scene, clock, meshes, particles }: {
           y: THREE.MathUtils.lerp(pair.previous.yMeters, pair.current.yMeters, t), rotation: pair.previous.angleRadians + angle * t });
       }
     } else if (frame.dimension === '3d' && meshes) {
+      const playerPose = frame.poses.find((pair) => pair.entityId === 'player');
+      if (camera instanceof THREE.PerspectiveCamera) {
+        const aspect = size.width / Math.max(1, size.height);
+        if (camera.aspect !== aspect) {
+          camera.aspect = aspect;
+          camera.updateProjectionMatrix();
+        }
+        if (playerPose) {
+          const t = playerPose.snap ? 1 : frame.alpha;
+          playerPosition.set(...playerPose.previous.positionMeters).lerp(position.set(...playerPose.current.positionMeters), t);
+          fitCamera3D(camera, aspect, playerPosition, frameSphere);
+        } else {
+          fitCamera3D(camera, aspect, undefined, frameSphere);
+        }
+      }
       for (const pair of frame.poses) {
         const mesh = meshes.get(pair.entityId); if (!mesh) continue;
         mesh.visible = pair.visible;
