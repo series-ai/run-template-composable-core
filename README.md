@@ -1,52 +1,73 @@
-# Composable Core
+# Modules template
 
-A RUN.game starter with React 19, React Three Fiber 9, Three.js, Zustand, and Tailwind CSS 4.
+This starter uses React 19, R3F 9, Three, and Syncplay 6.0.0-rc.70.
+Select Play to start the 2D collection game.
+Select Switch to 3D to play the 3D collection game.
+Both games use real Syncplay physics.
 
-## Run locally
+## Local commands
 
-Use Node.js 24 and npm. Install the locked dependencies:
+Use Node.js 24.
 
     npm ci
     npm run dev
-
-Open the URL that Vite prints. Select **+10 Points** to change the score.
-Select the camera button to switch between the 2D and 3D views.
-
-## Build
-
+    npm test
     npm run build
-    npm run preview
 
-The build runs TypeScript checks and writes the game to `dist/`.
-GitHub Actions runs a clean install and build for pushes to `main` and pull requests.
+The build checks TypeScript and writes dist/.
+The tests use the published Syncplay WASM files.
 
-## Included code
+## Controls
 
-- `src/viewport/GameViewport.tsx` provides the canvas and camera views.
-- `src/core/frameLoop.ts` provides a fixed-step update loop.
-- `src/core/eventBus.ts` provides typed game events.
-- `src/core/gameState.ts` stores the score and game state.
-- `src/core/moduleHost.ts` provides signal and event bindings for modules.
-- `game.config.prod.json` provides the RUN.game configuration.
+Use the arrow keys or A/D to move in 2D.
+Use the arrow keys or W/A/S/D to move in 3D.
+Use Space to jump.
+Touch devices show direction and jump buttons.
+Standard gamepads use the left stick, direction pad, and first button.
+The gamepad mapping still needs a physical device check.
 
-The demo uses the event bus and game state. It does not connect modules to the
-module host automatically. Module installation and integration need separate
-verification for each module.
+## Owners
 
-## Studio import
+- src/core/StarterApplication.ts owns startup, input, host events, audio, and assets.
+- src/modules/runtime/game-application/ owns each offline world and its fixed clock.
+- src/viewport/GameViewport.tsx reads presentation poses. It does not step another world.
+- src/modules/two-d/scene/ supplies sprites, atlases, tiles, cameras, and particles.
+- src/modules/two-d/graphics/ supplies world text, shapes, masks, and bounded image effects.
+- src/modules/ui/game-shell/ supplies the shared DOM interface.
 
-Studio imports this repository from the `main` branch. The game files are at the
-repository root. Studio catalog registration and the Modules beta gate are
-configured in Venus. This repository does not enable either setting.
+The SDK storage adapter stores settings and best scores separately from round resumes.
+Each dimension has its own resume record.
+Restored rounds wait for the player to select Resume.
+The game saves on pause, collection, settings changes, and when the page becomes hidden.
+SDK storage writes are asynchronous. A hard reload can interrupt an unfinished write.
+The pagehide save is best effort. It does not guarantee the latest round state.
+The browser build uses the SDK local host when no RUN host is present.
+This does not verify the deployed host or cloud storage.
 
-## Source
+## Module source
 
-The initial source comes from `templates/composable-core/` in
-`series-ai/venus` at commit `b6dd7b0f1700c79719b43d8ed2ed86501771303f`.
-This copy updates Drei for React Three Fiber 9 and removes an unused import.
-It also preserves Tailwind control spacing and points the 3D camera at the demo.
-The license notice follows the existing RUN.game starter repositories.
+The canonical module source is in the Venus modules/ catalog.
+Do not edit the generated copies in this template inside Venus.
+Use these commands from the Venus root:
+
+    node scripts/modules/sync-starter-modules.mjs
+    node scripts/modules/sync-starter-modules.mjs --check
+
+module-sources.json records each copied file hash.
+Each module includes upstream file hashes and adaptation notes.
+
+## Delivery limits
+
+The template supports offline worlds.
+It does not create multiplayer sessions or adopt the genre controller slices.
+Phone performance, full core parity, and staging H5 delivery remain release gates.
+Syncplay 3D initialization requires JavaScript runtime code generation.
+The current RUN H5 origin policy permits this and WASM compilation.
+A different host must verify its CSP before use.
+
+Studio imports a separate template repository.
+A local Venus build does not update that repository or the Studio catalog.
 
 ## License
 
-See `LICENSE.txt`.
+See LICENSE.txt.

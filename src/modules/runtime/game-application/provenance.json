@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "module": "runtime/game-application",
+  "upstream": {
+    "repository": "game-bot",
+    "commit": "dec2286bcdf1da4c2a5394cdf8e7ef6043ceb005",
+    "sourceState": "working-tree",
+    "note": "Source hashes identify the inspected files. The upstream checkout has local changes."
+  },
+  "sources": [
+    {
+      "sourcePath": "modules/data/storage-service/src/StorageService.ts",
+      "sha256": "b9833e147bd64b11c48aaa60ba7444ca172f2ba898833354a7bf98d72fdd643e",
+      "adaptations": "Adapted key validation and extracted the StorageLike interface and MemoryStorage fallback for headless execution."
+    },
+    {
+      "sourcePath": "modules/data/storage-service/src/PersistenceManager.ts",
+      "sha256": "37fbcafd676a63b948f9db24e20d280f7c30228660bdfb5d25d8661d17886177",
+      "adaptations": "Adapted dirty state flush concepts into an atomic A/B journal with generation counters and checksum verification."
+    },
+    {
+      "sourcePath": "modules/data/player-data-versioning/src/PlayerDataVersioning.ts",
+      "sha256": "7435bbccee0b57e224397c56190bdefeb226dfcad914f0e285384e35d945c3d7",
+      "adaptations": "Adapted schema version checks, corruption recovery rules, and preservation of unknown future schema fields."
+    },
+    {
+      "sourcePath": "src/modules/data/event-bus/EventBus.ts",
+      "sha256": "a723c5f152dbf6627a61e1061c2927bf3e0c6d3b76abc5663cdadb466db3f19c",
+      "adaptations": "Adapted event emission into changed-only UI view model subscriptions and sequential event IDs."
+    },
+    {
+      "sourcePath": "modules/two-d/virtual-joystick/src/VirtualJoystick.ts",
+      "sha256": "9822fb80b524452718fa46fb899972c3e57ed81c14f5e8dec3f4ed19867173eb",
+      "adaptations": "Extracted continuous directional axis calculation decoupled from DOM pointer listeners."
+    },
+    {
+      "sourcePath": "modules/two-d/gamepad-input/src/gamepadReader.ts",
+      "sha256": "86655271663268e5132ce9e54c57b10a4f4fe874ad3cc930b4371ff19659a5a3",
+      "adaptations": "Adapted button state edge detection to latch single-tick press commands for fixed simulation ticks."
+    }
+  ]
+}

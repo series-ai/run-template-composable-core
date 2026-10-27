@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "module": "ui/game-shell",
+  "upstream": {
+    "repository": "game-bot",
+    "commit": "dec2286bcdf1da4c2a5394cdf8e7ef6043ceb005",
+    "sourceState": "working-tree",
+    "note": "Source hashes identify the inspected files. The upstream checkout has local changes."
+  },
+  "sources": [
+    {
+      "sourcePath": "docs/skin-system.md",
+      "sha256": "f000a78680243d85b18613afd84c249761b5f84bdee88f7ddcf899cf5dc45a59",
+      "targetPath": "src/game-shell.css",
+      "adaptations": "Adapted semantic architecture: data-ui-skin-role markers, portable CSS custom properties, dark and light theme palettes, responsive geometry, and accessibility focus rules."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/SkinButton.tsx",
+      "sha256": "ffbbadf8667c5c4489c32b1dd84b752b7500e14446f55a84c9c8808fbcdc8300",
+      "targetPath": "src/SkinButton.tsx",
+      "adaptations": "Added React 19 default export. Enforced 44px minimum touch target size. Removed external icon package dependencies in favor of local inline SVG icons. Preserved semantic roles and active press states."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/SkinPanel.tsx",
+      "sha256": "b103e3f317e0f09013a7ba52c7e8cad2fa0fad84613ed45ae7d49e5246cd7b4e",
+      "targetPath": "src/SkinPanel.tsx",
+      "adaptations": "Added React 19 default export. Retained semantic slots for header, title, body, and actions. Maintained data-ui-skin-role markers."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/SkinDialog.tsx",
+      "sha256": "5a9bb351a5987d87f52d7019684c72d7e5a15b3208e7004b1ff0ffaf33a81022",
+      "targetPath": "src/SkinDialog.tsx",
+      "adaptations": "Added React 19 default export. Integrated with focus trap and escape dismissal hooks. Configured overlay backdrop with safe-area spacing."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/SkinProgress.tsx",
+      "sha256": "bf855fec1edd53dc851201b258c1d9f38c060e8c58148e32504510c4818527d5",
+      "targetPath": "src/SkinProgress.tsx",
+      "adaptations": "Added React 19 default export. Implemented progress bar with CSS custom property track and fill clipping. Supports optional label and percent value."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/SkinInput.tsx",
+      "sha256": "c9285074098fc9f51ed479a439938aca3f442b200ae8c8b50b171d089548555c",
+      "targetPath": "src/SkinSwitch.tsx",
+      "adaptations": "Extracted switch control into dedicated component. Added React 19 default export. Enforced 44px minimum touch targets and accessible switch ARIA roles."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/SkinFormControls.tsx",
+      "sha256": "70d0924a41e2184de7a502f4b8bdfbb272a2aaed6fae8a8589df050371425525",
+      "targetPath": "src/SkinSwitch.tsx",
+      "adaptations": "Integrated switch styling and label layout with custom toggle thumb animation."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/SkinState.tsx",
+      "sha256": "4851925bd46c7a798956bc3f52e7324a9a943c6a22d8302a2356eed490c68cf0",
+      "targetPath": "src/SkinState.tsx",
+      "adaptations": "Added React 19 default export. Wired loading spinner and error retry states with inline SVG icons and action buttons."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/theme/base.css",
+      "sha256": "4a8bc770370adc71a7d815a3f9e248a356ec1124bea5aa9f87d3cb770133a745",
+      "targetPath": "src/game-shell.css",
+      "adaptations": "Extracted semantic variables for surfaces, text, buttons, panels, progress, and inputs. Added responsive layouts for 390px mobile and 1440px desktop. Added pointer-events pass-through for world canvas."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/theme/useFocusTrap.ts",
+      "sha256": "d1294f69da278afb7825af186975a0c26aee6fcb3c9985171628f24387bb4cd8",
+      "targetPath": "src/useFocusTrap.ts",
+      "adaptations": "Adapted focus trap hook for React 19. Retained autofocus preference, tab wrapping, and focus restoration upon unmount."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/theme/useDismissOnEscape.ts",
+      "sha256": "e7c0e9958f5c8c1e7b1f4b8fed411b6dbbfc3e1a94156e6d6dbf0d2a5bf0b7ea",
+      "targetPath": "src/useDismissOnEscape.ts",
+      "adaptations": "Adapted escape listener hook for React 19. Triggers dismiss callback on Escape keydown."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/theme/classNames.ts",
+      "sha256": "3037f587341629a5e33d1bf39b2a73054319df94d58516b9a390641c1112642a",
+      "targetPath": "src/classNames.ts",
+      "adaptations": "Preserved joinClassName utility function for filtering and concatenating class strings."
+    },
+    {
+      "sourcePath": "modules/ui/skin/src/theme/geometry-contract.ts",
+      "sha256": "6c628d5d0e05d39fe7fae7cf29fcf8828df2c1dc0c7b69f0ee744258b8d0b19b",
+      "targetPath": "src/game-shell.css",
+      "adaptations": "Incorporated 44px minimum touch target size and responsive phone padding rules into CSS variables."
+    }
+  ]
+}

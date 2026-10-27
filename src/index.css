@@ -1,8 +1,4 @@
-@import "tailwindcss";
 
-@layer base {
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #f1f5f9;
-  }
-}
+html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { font-family: system-ui, sans-serif; }
+canvas { display: block; touch-action: none; }

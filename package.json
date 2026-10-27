@@ -1,42 +1,39 @@
 {
   "name": "run-template-composable-core",
   "version": "1.0.0",
-  "description": "Unified Composable Module-Friendly Core Template (React 19 + R3F 9 + Three.js + Zustand + Tailwind v4)",
+  "description": "Modules starter with R3F, Three, Syncplay, and shared DOM UI",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && rundot deploy"
+    "deploy": "npm run build && rundot deploy",
+    "test": "node --import tsx --test verify/*.test.*"
   },
   "keywords": [
     "react19",
     "r3f",
     "threejs",
-    "zustand",
-    "tailwind4",
     "rundot",
     "game-engine"
   ],
   "author": "RUN.game Platform Engineering",
   "license": "SEE LICENSE IN LICENSE.txt",
   "dependencies": {
-    "@react-three/drei": "10.7.9",
-    "@react-three/fiber": "^9.0.0",
+    "@react-three/fiber": "9.8.2",
     "@series-inc/rundot-game-sdk": "5.28.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "three": "~0.170.0",
-    "zustand": "^5.0.3"
+    "@series-inc/rundot-syncplay": "6.0.0-rc.70",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "three": "0.170.0"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^24.3.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/three": "~0.170.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "tailwindcss": "^4.0.0",
+    "tsx": "4.20.5",
     "typescript": "^5.9.2",
     "vite": "^6.3.5"
   }
