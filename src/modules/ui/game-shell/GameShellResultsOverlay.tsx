@@ -58,6 +58,7 @@ export function GameShellResultsOverlay({
             actions={actions}
             open={open}
             resultsActions={resultsActions}
+            view={view}
           />
         </div>
       }

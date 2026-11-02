@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import SkinButton from './SkinButton'
 import { isSkinIconName } from './SkinIcon'
-import type { GameShellActions, ResultsAction } from './types'
+import type { GameShellActions, GameShellView, ResultsAction } from './types'
 
 export interface GameShellResultsActionsProps {
   open: boolean
   resultsActions: ResultsAction[]
   actions: GameShellActions
+  view: GameShellView
 }
 
 /** Draws the buttons other modules add to the results screen. Each results screen starts fresh. */
@@ -14,6 +15,7 @@ export function GameShellResultsActions({
   open,
   resultsActions,
   actions,
+  view,
 }: GameShellResultsActionsProps) {
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set())
   const [claimed, setClaimed] = useState<ReadonlySet<string>>(new Set())
@@ -37,7 +39,7 @@ export function GameShellResultsActions({
     let done = false
     try {
       const outcome = await action.run({
-        addScore: addScore && ((points: number) => { if (current()) addScore(points) }),
+        addScore: addScore && ((points: number) => { if (current()) addScore(points, action.id) }),
       })
       notice = outcome?.notice
       done = outcome?.claimed === true
@@ -67,7 +69,7 @@ export function GameShellResultsActions({
           key={action.id}
           style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}
         >
-          {claimed.has(action.id) ? null : (
+          {claimed.has(action.id) || view.rewardsClaimed?.includes(action.id) ? null : (
             <SkinButton
               disabled={busy.has(action.id)}
               iconName={isSkinIconName(action.icon) ? action.icon : undefined}

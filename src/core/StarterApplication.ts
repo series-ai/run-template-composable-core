@@ -56,10 +56,9 @@ export class StarterApplication {
         });
       }
     },
-    addScore: (points) => {
+    addScore: (points, key) => {
       if (!this.game) return;
-      this.game.addBonus(points); if (this.view.settings?.sound) this.playReward();
-      void this.game.save().catch(console.warn);
+      this.game.addBonus(points, key); void this.game.save().catch(console.warn);
     },
   };
 

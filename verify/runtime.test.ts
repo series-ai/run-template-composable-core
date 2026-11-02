@@ -67,6 +67,26 @@ test('a bonus counts toward the score, the best score and the save, then resets 
   finally { restored.dispose(); }
 });
 
+test('a keyed bonus counts once per round and survives a reload', async () => {
+  const storage = new Storage(); const app = await createGameApplication({ dimension: '2d', storage });
+  app.start(); tick(app, 4);
+  const before = app.getView().score;
+  app.addBonus(100, 'ad'); app.addBonus(100, 'ad');
+  assert.equal(app.getView().score, before + 100);
+  assert.deepEqual(app.getView().rewardsClaimed, ['ad']);
+  await app.save(); app.dispose();
+  const reloaded = await createGameApplication({ dimension: '2d', storage });
+  try {
+    await reloaded.restore();
+    assert.equal(reloaded.getView().score, before + 100);
+    assert.deepEqual(reloaded.getView().rewardsClaimed, ['ad']);
+    reloaded.addBonus(100, 'ad');
+    assert.equal(reloaded.getView().score, before + 100);
+    reloaded.restart();
+    assert.deepEqual(reloaded.getView().rewardsClaimed, []);
+  } finally { reloaded.dispose(); }
+});
+
 for (const blockedKey of ['progress_slot_a', 'round_resume_2d']) {
   test(`dispose cancels restore while ${blockedKey} is pending`, async () => {
     const values = new Storage(); const original = await createGameApplication({ dimension: '2d', storage: values });

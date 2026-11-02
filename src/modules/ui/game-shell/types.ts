@@ -23,6 +23,8 @@ export interface GameShellView {
   canPickDimension?: boolean
   instructions?: string | string[]
   levelName?: string
+  /** Results actions whose reward this round already has, so they stay hidden after a reload. */
+  rewardsClaimed?: readonly string[]
 }
 
 export interface GameShellActions {
@@ -36,8 +38,8 @@ export interface GameShellActions {
   press: (action: string) => void
   setSettings: (settings: Partial<GameSettings>) => void
   setMenuOpen?: (open: boolean) => void
-  /** Adds points to the finished round's score, best score and save. */
-  addScore?: (points: number) => void
+  /** Adds points to the finished round's score, best score and save. A key counts once per round. */
+  addScore?: (points: number, key?: string) => void
 }
 
 export interface ResultsActionContext {

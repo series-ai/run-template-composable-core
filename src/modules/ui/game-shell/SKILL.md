@@ -63,7 +63,7 @@ import '@modules/ui/game-shell/src/game-shell.css'
 | `setHeld` | `(action: string, held: boolean)` | Sets continuous control hold state |
 | `press` | `(action: string)` | Sends single button press command |
 | `setSettings` | `(settings: Partial<GameSettings>)` | Saves updated player preferences |
-| `addScore` | `(points: number)?` | Adds points to the finished round, best score and save. Results buttons use it for rewards |
+| `addScore` | `(points: number, key?: string)?` | Adds points to the finished round, best score and save. A key counts once per round. Results buttons pass their id |
 
 ## External Store Pattern
 
@@ -96,6 +96,7 @@ Other modules add buttons to the results screen through `resultsActions`.
 The shell draws each one as a secondary button and owns its state.
 A button is disabled while its action runs.
 It hides once its action returns `claimed: true`, and comes back on the next results screen.
+A button whose reward the round already has (`view.rewardsClaimed`) stays hidden, including after a reload.
 An action's `notice` shows under its button.
 An unknown icon name shows no icon.
 
