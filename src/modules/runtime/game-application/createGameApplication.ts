@@ -138,6 +138,9 @@ export async function createGameApplication(
   let lastAlpha = 0;
   let saveQueue: Promise<void> = Promise.resolve();
   let restoreGeneration = 0;
+  // Points added outside the simulation, such as an ad reward. Cleared with each new round.
+  let bonus = 0;
+  const roundScore = (): number => adapter.score + bonus;
 
   const app: GameApplication = {
     pump(deltaSeconds: number): void {
@@ -157,7 +160,7 @@ export async function createGameApplication(
       if (adapter.status !== 'running') {
         store.update({
           status: adapter.status,
-          score: adapter.score,
+          score: roundScore(),
           secondsRemaining:
             adapter.secondsRemaining !== null
               ? Math.max(0, Math.ceil(adapter.secondsRemaining))
@@ -177,20 +180,20 @@ export async function createGameApplication(
       lastAlpha = pumpResult.alpha;
 
       // Update best score if beaten
-      if (adapter.score > (progress.bestScores[dimension] ?? 0)) {
+      if (roundScore() > (progress.bestScores[dimension] ?? 0)) {
         progress = {
           ...progress,
           bestScores: {
             ...progress.bestScores,
-            [dimension]: adapter.score,
+            [dimension]: roundScore(),
           },
         };
-        store.update({ bestScore: adapter.score });
+        store.update({ bestScore: roundScore() });
       }
 
       store.update({
         status: adapter.status,
-        score: adapter.score,
+        score: roundScore(),
         secondsRemaining:
           adapter.secondsRemaining !== null
             ? Math.max(0, Math.ceil(adapter.secondsRemaining))
@@ -236,12 +239,13 @@ export async function createGameApplication(
       // Reset only user pause cause; preserve host/hidden/context causes
       runtime.setSuspended('pause', false);
       adapter.restart();
+      bonus = 0;
       adapter.status = 'running';
       runtime.reset();
       input.reset();
       store.update({
         status: 'running',
-        score: adapter.score,
+        score: roundScore(),
         secondsRemaining: adapter.secondsRemaining,
         objective: adapter.objective,
         isSuspended: runtime.isSuspended(),
@@ -290,7 +294,7 @@ export async function createGameApplication(
       // Synchronously capture state before the first await
       const currentInput = input.captureState();
       const checkpoint = adapter.captureCheckpoint(currentInput);
-      const currentScore = adapter.score;
+      const currentScore = roundScore();
       const currentStatus = adapter.status;
       const settingsToSave = { ...currentSettings };
       const bestScoresToSave = { ...progress.bestScores };
@@ -365,7 +369,7 @@ export async function createGameApplication(
       if (stale()) return;
       if (!resume) {
         if (journal.invalidResume) {
-          adapter.restart(); input.reset(); runtime.reset();
+          adapter.restart(); input.reset(); runtime.reset(); bonus = 0;
           store.update({ status: adapter.status, score: 0, secondsRemaining: 60,
             notice: 'The saved round was damaged. A new round is ready.' });
           await journal.clearResume(dimension);
@@ -388,11 +392,12 @@ export async function createGameApplication(
 
       try {
         adapter.restoreCheckpoint(resume.roundCheckpoint);
+        bonus = 0;
         input.reset();
         runtime.reset();
         store.update({
           status: adapter.status,
-          score: adapter.score,
+          score: roundScore(),
           secondsRemaining:
             adapter.secondsRemaining !== null
               ? Math.max(0, Math.ceil(adapter.secondsRemaining))
@@ -402,7 +407,7 @@ export async function createGameApplication(
         });
       } catch {
         adapter.restart();
-        input.reset(); runtime.reset();
+        input.reset(); runtime.reset(); bonus = 0;
         store.update({
           status: adapter.status, score: 0, secondsRemaining: 60, objective: adapter.objective,
           notice: 'Failed to restore corrupted round. Started fresh round.',
@@ -428,13 +433,14 @@ export async function createGameApplication(
         ++restoreGeneration;
         lastAlpha = 0;
         adapter.restoreCheckpoint(checkpoint);
+        bonus = 0;
         if (checkpoint.inputState) {
           input.restoreState(checkpoint.inputState);
         }
         runtime.reset();
         store.update({
           status: adapter.status,
-          score: adapter.score,
+          score: roundScore(),
           secondsRemaining:
             adapter.secondsRemaining !== null
               ? Math.max(0, Math.ceil(adapter.secondsRemaining))
@@ -494,6 +500,18 @@ export async function createGameApplication(
         ...settingsPatch,
       };
       store.update({ settings: currentSettings });
+    },
+
+    addBonus(points: number): void {
+      if (isDisposed || !Number.isFinite(points) || points <= 0) {
+        return;
+      }
+      bonus += Math.floor(points);
+      const score = roundScore();
+      if (score > (progress.bestScores[dimension] ?? 0)) {
+        progress = { ...progress, bestScores: { ...progress.bestScores, [dimension]: score } };
+      }
+      store.update({ score, bestScore: progress.bestScores[dimension] ?? 0 });
     },
   };
 

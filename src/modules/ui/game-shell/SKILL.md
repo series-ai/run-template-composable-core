@@ -63,6 +63,7 @@ import '@modules/ui/game-shell/src/game-shell.css'
 | `setHeld` | `(action: string, held: boolean)` | Sets continuous control hold state |
 | `press` | `(action: string)` | Sends single button press command |
 | `setSettings` | `(settings: Partial<GameSettings>)` | Saves updated player preferences |
+| `addScore` | `(points: number)?` | Adds points to the finished round, best score and save. Results buttons use it for rewards |
 
 ## External Store Pattern
 
@@ -87,6 +88,31 @@ store.updateField('score', 10)
 <GameShell view={store} actions={actions}>
   <GameCanvas />
 </GameShell>
+```
+
+## Results Buttons
+
+Other modules add buttons to the results screen through `resultsActions`.
+The shell draws each one as a secondary button and owns its state.
+A button is disabled while its action runs.
+It hides once its action returns `claimed: true`, and comes back on the next results screen.
+An action's `notice` shows under its button.
+An unknown icon name shows no icon.
+
+```tsx
+import type { ResultsAction } from '@modules/ui/game-shell/types'
+
+const resultsActions: ResultsAction[] = [{
+  id: 'double-coins',
+  label: 'Double your coins',
+  icon: 'trophy',
+  run: async ({ addScore }) => {
+    addScore?.(50)
+    return { claimed: true, notice: '+50 points!' }
+  },
+}]
+
+<GameShell view={view} actions={actions} resultsActions={resultsActions}>
 ```
 
 ## Accessibility and Controls

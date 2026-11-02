@@ -51,6 +51,22 @@ test('a restart cannot discard the best score before the next save', async () =>
   finally { restored.dispose(); }
 });
 
+test('a bonus counts toward the score, the best score and the save, then resets with the round', async () => {
+  const storage = new Storage(); const app = await createGameApplication({ dimension: '2d', storage });
+  app.start(); tick(app, 4);
+  const before = app.getView().score;
+  app.addBonus(250); tick(app, 2);
+  assert.equal(app.getView().score, before + 250);
+  assert.equal(app.getView().bestScore, before + 250);
+  app.addBonus(-5); app.addBonus(Number.NaN);
+  assert.equal(app.getView().score, before + 250);
+  await app.save(); app.restart();
+  assert.equal(app.getView().score, 0); app.dispose();
+  const restored = await createGameApplication({ dimension: '2d', storage });
+  try { await restored.restore(); assert.equal(restored.getView().bestScore, before + 250); }
+  finally { restored.dispose(); }
+});
+
 for (const blockedKey of ['progress_slot_a', 'round_resume_2d']) {
   test(`dispose cancels restore while ${blockedKey} is pending`, async () => {
     const values = new Storage(); const original = await createGameApplication({ dimension: '2d', storage: values });

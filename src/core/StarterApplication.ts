@@ -56,6 +56,11 @@ export class StarterApplication {
         });
       }
     },
+    addScore: (points) => {
+      if (!this.game) return;
+      this.game.addBonus(points); if (this.view.settings?.sound) this.playReward();
+      void this.game.save().catch(console.warn);
+    },
   };
 
   async load(dimension: Dimension): Promise<void> {

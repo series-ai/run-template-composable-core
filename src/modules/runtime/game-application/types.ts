@@ -249,4 +249,6 @@ export interface GameApplication {
   resume(): void;
   retry(): Promise<void>;
   setSettings(settings: Partial<GameSettings>): void;
+  /** Adds points to this round's score, such as a reward. A new round starts from zero again. */
+  addBonus(points: number): void;
 }

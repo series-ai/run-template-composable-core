@@ -36,6 +36,7 @@ export function GameShell({
   actions,
   children,
   touchControls,
+  resultsActions,
   className,
   style,
 }: GameShellProps) {
@@ -184,6 +185,7 @@ export function GameShell({
       <GameShellResultsOverlay
         actions={actions}
         open={view.status === 'results' && !settingsOpen && !helpOpen}
+        resultsActions={resultsActions}
         view={view}
       />
 

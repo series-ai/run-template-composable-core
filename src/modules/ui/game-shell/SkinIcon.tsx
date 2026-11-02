@@ -26,6 +26,16 @@ export type SkinIconName =
   | 'dpad-left'
   | 'dpad-right'
 
+const SKIN_ICON_NAMES: ReadonlySet<string> = new Set<SkinIconName>([
+  'play', 'pause', 'resume', 'restart', 'retry', 'settings', 'sound-on', 'sound-off',
+  'motion', 'help', 'close', 'check', 'chevron-left', 'chevron-right', '2d', '3d',
+  'trophy', 'clock', 'target', 'info', 'dpad-up', 'dpad-down', 'dpad-left', 'dpad-right',
+])
+
+export function isSkinIconName(name: string | undefined): name is SkinIconName {
+  return name !== undefined && SKIN_ICON_NAMES.has(name)
+}
+
 export interface SkinIconProps extends SVGProps<SVGSVGElement> {
   name: SkinIconName
   size?: number | string
