@@ -58,6 +58,8 @@ export interface GameViewModel {
   readonly settings: GameSettings;
   readonly canPickDimension?: boolean;
   readonly instructions?: readonly string[];
+  /** Keys of the rewards already added to this round with `addBonus`. */
+  readonly rewardsClaimed?: readonly string[];
 }
 
 /**
@@ -196,6 +198,8 @@ export interface RoundResume {
   readonly runtimeIdentity: string;
   readonly progressGeneration: number;
   readonly roundCheckpoint: RoundCheckpoint;
+  /** Points added outside the simulation this round, and the keys of the rewards that added them. */
+  readonly bonus?: { readonly points: number; readonly keys: readonly string[] };
 }
 
 /**
@@ -249,4 +253,9 @@ export interface GameApplication {
   resume(): void;
   retry(): Promise<void>;
   setSettings(settings: Partial<GameSettings>): void;
+  /**
+   * Adds points to this round's score, such as a reward. A key makes it once per round: a second
+   * call with the same key is ignored, including after a reload. A new round starts from zero again.
+   */
+  addBonus(points: number, key?: string): void;
 }

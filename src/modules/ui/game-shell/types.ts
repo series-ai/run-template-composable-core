@@ -23,6 +23,8 @@ export interface GameShellView {
   canPickDimension?: boolean
   instructions?: string | string[]
   levelName?: string
+  /** Results actions whose reward this round already has, so they stay hidden after a reload. */
+  rewardsClaimed?: readonly string[]
 }
 
 export interface GameShellActions {
@@ -36,6 +38,28 @@ export interface GameShellActions {
   press: (action: string) => void
   setSettings: (settings: Partial<GameSettings>) => void
   setMenuOpen?: (open: boolean) => void
+  /** Adds points to the finished round's score, best score and save. A key counts once per round. */
+  addScore?: (points: number, key?: string) => void
+}
+
+export interface ResultsActionContext {
+  addScore?: (points: number) => void
+}
+
+export interface ResultsActionOutcome {
+  /** Shown under the button. */
+  notice?: string
+  /** Hides the button until the next results screen. */
+  claimed?: boolean
+}
+
+/** A button another module adds to the results screen. The shell draws it and resets it each round. */
+export interface ResultsAction {
+  id: string
+  label: string
+  /** A SkinIcon name. An unknown name shows no icon. */
+  icon?: string
+  run: (context: ResultsActionContext) => Promise<ResultsActionOutcome | void>
 }
 
 export interface TouchButtonConfig {
@@ -62,6 +86,7 @@ export interface GameShellProps {
   actions: GameShellActions
   children?: ReactNode
   touchControls?: TouchControlsConfig
+  resultsActions?: ResultsAction[]
   className?: string
   style?: CSSProperties
 }

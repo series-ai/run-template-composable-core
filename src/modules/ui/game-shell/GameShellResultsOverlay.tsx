@@ -1,18 +1,21 @@
+import GameShellResultsActions from './GameShellResultsActions'
 import SkinButton from './SkinButton'
 import SkinDialog from './SkinDialog'
 import SkinIcon from './SkinIcon'
-import type { GameShellActions, GameShellView } from './types'
+import type { GameShellActions, GameShellView, ResultsAction } from './types'
 
 export interface GameShellResultsOverlayProps {
   open: boolean
   view: GameShellView
   actions: GameShellActions
+  resultsActions?: ResultsAction[]
 }
 
 export function GameShellResultsOverlay({
   open,
   view,
   actions,
+  resultsActions = [],
 }: GameShellResultsOverlayProps) {
   const { score, bestScore, dimension, canPickDimension, notice } = view
   const isNewBest = score >= bestScore && score > 0
@@ -50,6 +53,13 @@ export function GameShellResultsOverlay({
               {dimension === '2d' ? 'Play in 3D' : 'Play in 2D'}
             </SkinButton>
           ) : null}
+
+          <GameShellResultsActions
+            actions={actions}
+            open={open}
+            resultsActions={resultsActions}
+            view={view}
+          />
         </div>
       }
       open={open}
