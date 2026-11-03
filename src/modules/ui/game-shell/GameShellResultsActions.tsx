@@ -29,8 +29,8 @@ export function GameShellResultsActions({
     action.getState().then(
       (state) => { if (visitRef.current === visit) setStates((all) => ({ ...all, [action.id]: state })) },
       (error: unknown) => {
-        console.warn(`Results action ${action.id} could not check its state.`, error)
-        if (visitRef.current === visit) setStates((all) => ({ ...all, [action.id]: {} }))
+        console.warn(`Results action ${action.id} could not check its state, so it stays gray.`, error)
+        if (visitRef.current === visit) setStates((all) => ({ ...all, [action.id]: { disabled: true } }))
       },
     )
   }, [])
