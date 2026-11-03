@@ -53,12 +53,21 @@ export interface ResultsActionOutcome {
   claimed?: boolean
 }
 
+export interface ResultsActionState {
+  /** Grays the button out so it can't be tapped. */
+  disabled?: boolean
+  /** Button text to show instead of `label`, such as "Come back tomorrow". */
+  label?: string
+}
+
 /** A button another module adds to the results screen. The shell draws it and resets it each round. */
 export interface ResultsAction {
   id: string
   label: string
   /** A SkinIcon name. An unknown name shows no icon. */
   icon?: string
+  /** Asked when the results screen opens and after each tap. The button stays gray until it answers. */
+  getState?: () => Promise<ResultsActionState>
   run: (context: ResultsActionContext) => Promise<ResultsActionOutcome | void>
 }
 
