@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import SkinButton from './SkinButton'
 import { isSkinIconName } from './SkinIcon'
-import type { GameShellActions, GameShellView, ResultsAction } from './types'
+import type { GameShellActions, GameShellView, ResultsAction, ResultsActionState } from './types'
 
 export interface GameShellResultsActionsProps {
   open: boolean
@@ -20,7 +20,20 @@ export function GameShellResultsActions({
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set())
   const [claimed, setClaimed] = useState<ReadonlySet<string>>(new Set())
   const [notices, setNotices] = useState<Readonly<Record<string, string>>>({})
+  const [states, setStates] = useState<Readonly<Record<string, ResultsActionState>>>({})
   const visitRef = useRef(0)
+
+  const refreshState = useCallback((action: ResultsAction): void => {
+    if (!action.getState) return
+    const visit = visitRef.current
+    action.getState().then(
+      (state) => { if (visitRef.current === visit) setStates((all) => ({ ...all, [action.id]: state })) },
+      (error: unknown) => {
+        console.warn(`Results action ${action.id} could not check its state.`, error)
+        if (visitRef.current === visit) setStates((all) => ({ ...all, [action.id]: {} }))
+      },
+    )
+  }, [])
 
   useEffect(() => {
     if (open) return
@@ -28,7 +41,12 @@ export function GameShellResultsActions({
     setBusy(new Set())
     setClaimed(new Set())
     setNotices({})
+    setStates({})
   }, [open])
+
+  useEffect(() => {
+    if (open) resultsActions.forEach(refreshState)
+  }, [open, resultsActions, refreshState])
 
   const run = async (action: ResultsAction): Promise<void> => {
     const visit = visitRef.current
@@ -54,6 +72,7 @@ export function GameShellResultsActions({
       return next
     })
     if (done) setClaimed((ids) => new Set(ids).add(action.id))
+    refreshState(action)
     setNotices((all) => {
       const next = { ...all }
       if (notice) next[action.id] = notice
@@ -69,15 +88,15 @@ export function GameShellResultsActions({
           key={action.id}
           style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}
         >
-          {claimed.has(action.id) || view.rewardsClaimed?.includes(action.id) ? null : (
+          {claimed.has(action.id) || (!action.getState && view.rewardsClaimed?.includes(action.id)) ? null : (
             <SkinButton
-              disabled={busy.has(action.id)}
+              disabled={busy.has(action.id) || (action.getState !== undefined && (states[action.id] === undefined || states[action.id].disabled === true))}
               iconName={isSkinIconName(action.icon) ? action.icon : undefined}
               onClick={() => { void run(action) }}
               size="default"
               variant="secondary"
             >
-              {action.label}
+              {states[action.id]?.label ?? action.label}
             </SkinButton>
           )}
           {notices[action.id] ? (
