@@ -66,6 +66,13 @@ export function GameShellResultsActions({
       notice = 'Something went wrong. Please try again.'
     }
     if (!current()) return
+    if (action.getState) {
+      setStates((all) => {
+        const next = { ...all }
+        delete next[action.id]
+        return next
+      })
+    }
     setBusy((ids) => {
       const next = new Set(ids)
       next.delete(action.id)

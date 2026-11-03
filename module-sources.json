@@ -69,7 +69,7 @@
         "GameShellHelpDialog.tsx": "0eb38ec57d80af3a6103bed48b17c4e9605361483f4b5e15244d34cd667e3060",
         "GameShellHud.tsx": "5a5aa0b066499573c7603c69878c5fbf15d7dc52d965a1e7083ce99b7e46d8aa",
         "GameShellPauseMenu.tsx": "a0e353907622571536a1f4cedd45e41ca69788540a30a10fe3d9f0072211e281",
-        "GameShellResultsActions.tsx": "54a35e7fdefe85cd4bffb1d8222f620e2cc8e9e515b33e97c8ab79ec674c6094",
+        "GameShellResultsActions.tsx": "bd3c2f9ccef13855677bb8e711cb59c45288b6cde3a7a049f59d0c997df87cda",
         "GameShellResultsOverlay.tsx": "ee1bd72955fe06acda6131068daee42e88f74257e8f194ad79b763061bd38fb2",
         "GameShellSettingsDialog.tsx": "bde995a5c088913d989d7989c2098fece7f14fec90ebd6214e10735ed7b12ca4",
         "GameShellStartOverlay.tsx": "dc50e2a3e3cb9394ed7ab2e228f7f312a87399aa59405b5d19904fe03e69f872",
