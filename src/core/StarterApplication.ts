@@ -3,6 +3,7 @@ import { createGameApplication } from '../modules/runtime/game-application/creat
 import type { Dimension, GameApplication, StorageLike } from '../modules/runtime/game-application/types';
 import type { GameSettings, GameShellActions, GameShellView } from '../modules/ui/game-shell/types';
 import { ParticleEmitter } from '../modules/two-d/scene/ParticleEmitter';
+import { startupTasks } from '../module-slots';
 
 const initialView: GameShellView = {
   status: 'loading', dimension: '2d', score: 0, bestScore: 0,
@@ -226,6 +227,9 @@ export class StarterApplication {
       }),
     ];
     this.cleanups.push(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
+    for (const task of startupTasks) {
+      void Promise.resolve().then(task).catch((error: unknown) => console.warn('A module could not start.', error));
+    }
   }
   private publish(view: GameShellView): void {
     this.view = view; this.listeners.forEach((listener) => listener());
