@@ -12,3 +12,13 @@ export type StartupTask = () => unknown;
 export const startupTasks: StartupTask[] = [
   // modules:startup
 ];
+
+export type RoundEvent =
+  | { type: 'start'; mode: string }
+  | { type: 'end'; mode: string; score: number; bestScore: number; durationSeconds: number };
+export type RoundListener = (event: RoundEvent) => void;
+
+/** Called when a round starts and when it ends, such as to report analytics. Studio adds a module's listener here when it installs one. */
+export const roundListeners: RoundListener[] = [
+  // modules:round-events
+];

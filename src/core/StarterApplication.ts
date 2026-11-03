@@ -3,7 +3,7 @@ import { createGameApplication } from '../modules/runtime/game-application/creat
 import type { Dimension, GameApplication, StorageLike } from '../modules/runtime/game-application/types';
 import type { GameSettings, GameShellActions, GameShellView } from '../modules/ui/game-shell/types';
 import { ParticleEmitter } from '../modules/two-d/scene/ParticleEmitter';
-import { startupTasks } from '../module-slots';
+import { roundListeners, startupTasks, type RoundEvent } from '../module-slots';
 
 const initialView: GameShellView = {
   status: 'loading', dimension: '2d', score: 0, bestScore: 0,
@@ -32,13 +32,21 @@ export class StarterApplication {
   };
   readonly getView = (): GameShellView => this.view;
   readonly actions: GameShellActions = {
-    start: () => { this.unlockAudio(); this.game?.start(); },
+    start: () => {
+      this.unlockAudio();
+      const fresh = this.view.status === 'ready';
+      this.game?.start();
+      if (this.game && fresh) this.emitRound({ type: 'start', mode: this.view.dimension });
+    },
     pause: () => {
       this.game?.pause();
       void this.game?.save().catch(console.warn);
     },
     resume: () => { this.unlockAudio(); this.game?.resume(); },
-    restart: () => { this.unlockAudio(); this.game?.restart(); this.game?.start(); },
+    restart: () => {
+      this.unlockAudio(); this.game?.restart(); this.game?.start();
+      if (this.game) this.emitRound({ type: 'start', mode: this.view.dimension });
+    },
     retry: () => { void this.load(this.view.dimension); },
     setDimension: (dimension) => { void this.load(dimension); },
     setHeld: (action, held) => {
@@ -109,7 +117,10 @@ export class StarterApplication {
           void next.save().catch(console.warn);
         }
         previousScore = view.score;
-        if (view.status === 'results' && previousStatus !== 'results') void next.save().catch(console.warn);
+        if (view.status === 'results' && previousStatus !== 'results') {
+          void next.save().catch(console.warn);
+          this.emitRound({ type: 'end', mode: dimension, score: view.score, bestScore: view.bestScore, durationSeconds: frame.currentTick / 60 });
+        }
         previousStatus = view.status;
         this.publish({ ...view, instructions: view.instructions ? [...view.instructions] : undefined,
           canPickDimension: true, levelName: dimension === '2d' ? 'Sky garden' : 'Orb garden' });
@@ -229,6 +240,11 @@ export class StarterApplication {
     this.cleanups.push(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
     for (const task of startupTasks) {
       void Promise.resolve().then(task).catch((error: unknown) => console.warn('A module could not start.', error));
+    }
+  }
+  private emitRound(event: RoundEvent): void {
+    for (const listener of roundListeners) {
+      try { listener(event); } catch (error) { console.warn('A module could not handle the round event.', error); }
     }
   }
   private publish(view: GameShellView): void {
