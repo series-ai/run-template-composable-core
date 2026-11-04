@@ -5,6 +5,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "types": ["node"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -15,11 +16,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
-      "@modules/*": ["src/modules/*"],
-      "@core/*": ["src/core/*"],
-      "@viewport/*": ["src/viewport/*"]
+      "@modules/*": ["./src/modules/*"],
+      "@core/*": ["./src/core/*"],
+      "@viewport/*": ["./src/viewport/*"]
     }
   },
   "include": ["src"]
