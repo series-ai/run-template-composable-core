@@ -21,7 +21,7 @@
   "license": "SEE LICENSE IN LICENSE.txt",
   "dependencies": {
     "@react-three/fiber": "9.8.2",
-    "@series-inc/rundot-game-sdk": "5.28.1",
+    "@series-inc/rundot-game-sdk": "5.34.0",
     "@series-inc/rundot-syncplay": "6.0.0-rc.70",
     "react": "19.3.1",
     "react-dom": "19.3.1",
