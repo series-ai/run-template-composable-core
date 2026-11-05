@@ -76,6 +76,8 @@ export class StarterApplication {
   };
 
   private async playOnline(intent: OnlineIntent): Promise<{ roomCode?: string }> {
+    // A new attempt replaces the last one's ended state, so its own outcome is what shows.
+    if (this.game?.getView().online?.state === 'ended') this.game.leaveOnline();
     const request = {};
     this.onlineRequest = request;
     this.publish({ ...this.view, online: shellOnlineView(undefined, true) });
