@@ -56,3 +56,15 @@ test('a room request in flight shows Connecting even while the last round still 
   assert.match(html, />Leave</);
   assert.doesNotMatch(html, /Quick match/);
 });
+
+test('a request left before it fails stays quiet, while the next attempt still reports its own failure', async () => {
+  const { unlessLeft } = await import('../src/core/onlineView');
+  let current = 1;
+  let rejectFirst: (error: Error) => void = () => undefined;
+  const first = unlessLeft(new Promise<{ roomCode?: string }>((_, reject) => { rejectFirst = reject; }), () => current === 1, {});
+  current = 2; // Leave, then a new attempt starts.
+  rejectFirst(new Error('matchmaking failed'));
+  assert.deepEqual(await first, {});
+  await assert.rejects(unlessLeft(Promise.reject(new Error('no room')), () => current === 2, {}), /no room/);
+  assert.deepEqual(await unlessLeft(Promise.resolve({ roomCode: 'ABC123' }), () => current === 2, {}), { roomCode: 'ABC123' });
+});

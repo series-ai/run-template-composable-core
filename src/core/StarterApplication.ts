@@ -5,7 +5,7 @@ import type { GameSettings, GameShellActions, GameShellView, OnlineIntent } from
 import { ParticleEmitter } from '../modules/two-d/scene/ParticleEmitter';
 import { startupTasks } from '../module-slots';
 import { netRuntimeIdentity } from './netIdentity.generated';
-import { shellOnlineView } from './onlineView';
+import { shellOnlineView, unlessLeft } from './onlineView';
 
 const initialView: GameShellView = {
   status: 'loading', dimension: '2d', score: 0, bestScore: 0,
@@ -80,7 +80,7 @@ export class StarterApplication {
     this.onlineRequest = request;
     this.publish({ ...this.view, online: shellOnlineView(undefined, true) });
     try {
-      return await this.connectOnline(intent, request);
+      return await unlessLeft(this.connectOnline(intent, request), () => this.onlineRequest === request, {});
     } finally {
       if (this.onlineRequest === request) {
         this.onlineRequest = undefined;
