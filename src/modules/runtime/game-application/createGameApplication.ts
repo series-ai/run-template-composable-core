@@ -541,7 +541,7 @@ export async function createGameApplication(
     },
 
     resume(): void {
-      if (!isDisposed) {
+      if (!isDisposed && !online) {
         runtime.setSuspended('pause', false);
         if (adapter.status === 'paused') {
           adapter.status = 'running';
@@ -590,7 +590,10 @@ export async function createGameApplication(
       const expected = options.netIdentity;
       if (!expected) throw new Error('Online play needs the game\'s netIdentity.');
       app.leaveOnline();
+      // Leave bumps this, so a start the player already walked away from stops quietly.
+      const attempt = ++onlineAttempt;
       await initPhysics2D();
+      if (isDisposed || attempt !== onlineAttempt) return;
       const held = new Map<string, boolean>();
       const session: OnlineSession = {
         held, suspended: new Set(runtime.getSuspensionCauses().filter((cause) => cause !== 'pause')), jumpTicks: 0, restartTicks: 0, view: { state: 'connecting' }, unsubscribe: () => undefined,
@@ -622,15 +625,16 @@ export async function createGameApplication(
       try {
         await session.runner.start({ mode: 'networked', connect });
       } catch (error) {
-        if (online === session) {
-          session.view = { state: 'ended', message: 'Could not reach the room. Try again.' };
-          store.update({ online: session.view });
-        }
+        // Left while connecting: the runner was disposed on purpose, so this is not a failure.
+        if (online !== session) return;
+        session.view = { state: 'ended', message: 'Could not reach the room. Try again.' };
+        store.update({ online: session.view });
         throw error;
       }
     },
 
     leaveOnline(): void {
+      ++onlineAttempt;
       const session = online;
       if (!session) return;
       online = undefined;
@@ -657,6 +661,7 @@ export async function createGameApplication(
   };
 
   let online: OnlineSession | undefined;
+  let onlineAttempt = 0;
 
   function publishOnline(): void {
     const session = online;

@@ -113,7 +113,13 @@ export class StarterApplication {
         : await rooms.quickMatchSyncplayRoom(api.realtime, roomOptions);
     // Left or reloaded while the room was on its way: close it and stay solo.
     if (this.game !== game || this.onlineRequest !== request) { transport.close(); return {}; }
-    await game.startOnline(async () => transport);
+    try {
+      await game.startOnline(async () => transport);
+    } finally {
+      // Left while the room connected: the game stopped, so close the room it never used.
+      if (this.onlineRequest !== request) transport.close();
+    }
+    if (this.onlineRequest !== request) return {};
     return { roomCode: transport.roomCode };
   }
 

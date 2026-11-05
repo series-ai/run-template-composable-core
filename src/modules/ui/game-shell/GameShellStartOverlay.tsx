@@ -88,7 +88,7 @@ export function GameShellStartOverlay({
         >
           {notice || actionNotice || (online?.state === 'ended' && online.message) ? (
             <div className="game-shell__notice-banner">
-              <span>{actionNotice ?? (online?.state === 'ended' ? online.message : notice)}</span>
+              <span>{(online?.state === 'ended' && online.message) || actionNotice || notice}</span>
             </div>
           ) : null}
 
