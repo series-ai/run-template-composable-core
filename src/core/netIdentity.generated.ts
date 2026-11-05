@@ -7,5 +7,5 @@ export const netRuntimeIdentity: KinetixRuntimeIdentity = Object.freeze({
   "inputSchemaId": "932ff7d344862518ae53bb0c8d0010ca2de534e70402eafbdc477c7c19ea5252",
   "stateSchemaId": "8c7079532309a9f2f106b395a525b8986555e039789b616cb94a6eb29e7a5fd1",
   "deterministicVersion": "modules-template-coop@1+syncplay6.0.0-rc.70",
-  "engineIdentityHash": "817d35746290ad254d494d7d57e001a543e5572dd99a98219f29d8ff0fb992f4"
+  "engineIdentityHash": "5e4df6d129b526ef827dc4c9fa38ae1d223f061c7159a875bd6707b227805c7b"
 });
