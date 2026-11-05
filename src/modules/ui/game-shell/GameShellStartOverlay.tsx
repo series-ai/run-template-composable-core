@@ -1,13 +1,14 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import SkinButton from './SkinButton'
-import SkinIcon from './SkinIcon'
+import SkinIcon, { isSkinIconName } from './SkinIcon'
 import SkinPanel from './SkinPanel'
 import { useFocusTrap } from './useFocusTrap'
-import type { GameShellActions, GameShellView } from './types'
+import type { GameShellActions, GameShellView, StartAction } from './types'
 
 export interface GameShellStartOverlayProps {
   view: GameShellView
   actions: GameShellActions
+  startActions?: StartAction[]
   onOpenSettings?: () => void
   onOpenHelp?: () => void
 }
@@ -15,11 +16,26 @@ export interface GameShellStartOverlayProps {
 export function GameShellStartOverlay({
   view,
   actions,
+  startActions,
   onOpenSettings,
   onOpenHelp,
 }: GameShellStartOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   useFocusTrap(containerRef, true)
+  const [actionNotice, setActionNotice] = useState<string | null>(null)
+  const online = view.online
+  // The game shows `connecting` as soon as a room is requested, which hides these buttons, so
+  // the screen needs no busy state of its own that could outlive a cancelled request.
+  const inRoom = online?.state === 'connecting' || online?.state === 'waiting'
+  const playOnline = actions.playOnline
+  const runStartAction = (action: StartAction): void => {
+    if (!playOnline) return
+    setActionNotice(null)
+    action.run({ playOnline }).catch((error: unknown) => {
+      console.warn('A start screen action failed.', error)
+      setActionNotice('That did not work. Please try again.')
+    })
+  }
 
   const {
     objective,
@@ -70,9 +86,20 @@ export function GameShellStartOverlay({
             alignItems: 'center',
           }}
         >
-          {notice ? (
+          {notice || actionNotice || (online?.state === 'ended' && online.message) ? (
             <div className="game-shell__notice-banner">
-              <span>{notice}</span>
+              <span>{actionNotice ?? (online?.state === 'ended' ? online.message : notice)}</span>
+            </div>
+          ) : null}
+
+          {inRoom ? (
+            <div className="game-shell__start-objective" aria-live="polite">
+              <span className="game-shell__stat-label">
+                {online?.state === 'connecting' ? 'Connecting' : 'Waiting for your friend'}
+              </span>
+              {online?.roomCode ? (
+                <p className="game-shell__objective-text">Room code: <strong>{online.roomCode}</strong></p>
+              ) : null}
             </div>
           ) : null}
 
@@ -99,15 +126,33 @@ export function GameShellStartOverlay({
               marginTop: '8px',
             }}
           >
-            <SkinButton
-              data-autofocus
-              iconName="play"
-              onClick={actions.start}
-              size="hero"
-              variant="primary"
-            >
-              Play
-            </SkinButton>
+            {inRoom ? (
+              <SkinButton data-autofocus iconName="close" onClick={() => actions.leaveOnline?.()} size="hero" variant="secondary">
+                Leave
+              </SkinButton>
+            ) : (
+              <SkinButton
+                data-autofocus
+                iconName="play"
+                onClick={() => { if (online?.state === 'ended') actions.leaveOnline?.(); actions.start() }}
+                size="hero"
+                variant="primary"
+              >
+                Play
+              </SkinButton>
+            )}
+
+            {!inRoom && playOnline ? startActions?.map((action) => (
+              <SkinButton
+                key={action.id}
+                iconName={isSkinIconName(action.icon) ? action.icon : undefined}
+                onClick={() => runStartAction(action)}
+                size="default"
+                variant="secondary"
+              >
+                {action.label}
+              </SkinButton>
+            )) : null}
 
             <div
               style={{
@@ -117,7 +162,7 @@ export function GameShellStartOverlay({
                 justifyContent: 'center',
               }}
             >
-              {canPickDimension ? (
+              {canPickDimension && !inRoom ? (
                 <SkinButton
                   iconName={dimension === '2d' ? '3d' : '2d'}
                   onClick={() =>

@@ -91,3 +91,29 @@ await app.restore();
 
 The journal uses an atomic A/B record strategy with checksum verification.
 Corrupt round data resets safely to a fresh round while keeping valid progress.
+
+## Online play
+
+A 2D round can move onto a Syncplay deterministic room, where only player inputs cross the network
+and each player's game steps the same world. No room server code is involved.
+
+```ts
+import { createSyncplayRoom } from '@series-inc/rundot-syncplay/browser';
+import { NET_SEATS, netSessionConfigBytes, netSessionConfigDigest } from '@modules/runtime/game-application/netRuntime';
+
+const app = await createGameApplication({ dimension: '2d', netIdentity });
+const transport = await createSyncplayRoom(RundotAPI.realtime, {
+  maxPlayers: NET_SEATS, runtimeIdentity: netIdentity,
+  sessionConfigBytes: netSessionConfigBytes, sessionConfigDigest: netSessionConfigDigest,
+});
+await app.startOnline(async () => transport);
+// Later: app.leaveOnline();
+```
+
+- The shared world adds one copy of the scene's `player` entity per seat (`player`, `player_1`).
+  `app.localPlayerId` names the one this browser controls.
+- The round waits in `ready`, with `view.online.state` `waiting`, until every seat is filled.
+- Pause, save and restore do nothing while online. Restart starts a new round for everyone.
+- `netIdentity` binds the simulation sources and the Syncplay version. The game generates it
+  (the Modules template runs `npm run gen:net-identity`) and passes it in; a room from another build is refused.
+- The game's `rundot/rooms.config.json` declares the `deterministic` room type.

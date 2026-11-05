@@ -37,6 +37,7 @@ export function GameShell({
   children,
   touchControls,
   resultsActions,
+  startActions,
   className,
   style,
 }: GameShellProps) {
@@ -147,6 +148,7 @@ export function GameShell({
       {view.status === 'ready' ? (
         <GameShellStartOverlay
           actions={actions}
+          startActions={startActions}
           onOpenHelp={() => setHelpOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
           view={view}
@@ -185,7 +187,8 @@ export function GameShell({
       <GameShellResultsOverlay
         actions={actions}
         open={view.status === 'results' && !settingsOpen && !helpOpen}
-        resultsActions={resultsActions}
+        // Their rewards go to the solo round, so a shared round shows none.
+        resultsActions={view.online ? undefined : resultsActions}
         view={view}
       />
 

@@ -21,6 +21,44 @@ import { UIStore } from './store.js';
 import { PersistenceJournal, CURRENT_CHECKPOINT_VERSION } from './journal.js';
 import { WorldAdapter2D } from './adapter2d.js';
 import { WorldAdapter3D } from './adapter3d.js';
+import { initPhysics2D } from '@series-inc/rundot-syncplay/physics/2d';
+import {
+  createSyncplayRunner,
+  type SyncplayRoomTransport,
+  type SyncplayRunner,
+  type SyncplayRunnerSnapshot,
+} from '@series-inc/rundot-syncplay/browser';
+import {
+  createNetRuntime,
+  decodeNetInput,
+  encodeNetInput,
+  localNetInput,
+  NET_NEUTRAL_INPUT,
+  type NetInput,
+  type NetProjection,
+} from './netRuntime.js';
+import { seatEntityId } from './scene.js';
+import type { OnlineView } from './types.js';
+
+/** Ticks a tap holds jump or restart down, so the room sees it as a press. */
+const TAP_TICKS = 4;
+
+interface OnlineSession {
+  readonly runner: SyncplayRunner<NetInput, NetProjection, never>;
+  adapter?: WorldAdapter2D;
+  snapshot?: SyncplayRunnerSnapshot<NetProjection>;
+  readonly held: Map<string, boolean>;
+  /** Local reasons input is off, such as an open menu. The shared round keeps going. */
+  readonly suspended: Set<string>;
+  jumpTicks: number;
+  restartTicks: number;
+  view: OnlineView;
+  unsubscribe: () => void;
+}
+
+function sameOnlineView(a: OnlineView | undefined, b: OnlineView): boolean {
+  return !!a && a.state === b.state && a.roomCode === b.roomCode && a.message === b.message;
+}
 
 /**
  * Creates a headless GameApplication owner with Syncplay physics.
@@ -153,6 +191,12 @@ export async function createGameApplication(
         return;
       }
 
+      if (online) {
+        online.runner.update(Math.max(0, deltaSeconds * 1000));
+        publishOnline();
+        return;
+      }
+
       if (runtime.isSuspended()) {
         store.update({
           status: adapter.status,
@@ -211,19 +255,26 @@ export async function createGameApplication(
 
     input: {
       setHeld(action: InputAction, held: boolean): void {
-        if (!isDisposed) {
-          input.setHeld(action, held);
-        }
+        if (isDisposed) return;
+        if (online) online.held.set(action, held);
+        else input.setHeld(action, held);
       },
       press(action: InputAction): void {
-        if (!isDisposed) {
-          input.press(action);
-        }
+        if (isDisposed) return;
+        if (online) { if (action === 'jump') online.jumpTicks = TAP_TICKS; }
+        else input.press(action);
       },
     },
 
     setSuspended(cause: string, suspended: boolean): void {
       if (isDisposed) {
+        return;
+      }
+      // A shared round keeps going for the other players; only local input stops.
+      if (online) {
+        if (suspended) online.suspended.add(cause); else online.suspended.delete(cause);
+        online.held.clear();
+        publishOnline();
         return;
       }
       if (runtime.getSuspensionCauses().includes(cause) === suspended) return;
@@ -239,6 +290,7 @@ export async function createGameApplication(
       if (isDisposed) {
         return;
       }
+      if (online) { online.restartTicks = TAP_TICKS; return; }
       ++restoreGeneration;
       lastAlpha = 0;
       // Reset only user pause cause; preserve host/hidden/context causes
@@ -263,6 +315,7 @@ export async function createGameApplication(
       if (isDisposed) {
         return;
       }
+      app.leaveOnline();
       isDisposed = true;
       ++restoreGeneration;
       options.signal?.removeEventListener('abort', onAbort);
@@ -273,6 +326,7 @@ export async function createGameApplication(
     },
 
     getPresentation(): PresentationFrame {
+      if (online?.adapter) return online.adapter.getPresentation(online.snapshot?.renderAlpha ?? 1);
       return adapter.getPresentation(lastAlpha);
     },
 
@@ -285,7 +339,7 @@ export async function createGameApplication(
     },
 
     getScene(): SceneDefinition2D | SceneDefinition3D {
-      return adapter.getScene();
+      return online?.adapter?.getScene() ?? adapter.getScene();
     },
 
     getPhysicsDigest(): string {
@@ -293,7 +347,7 @@ export async function createGameApplication(
     },
 
     async save(): Promise<void> {
-      if (isDisposed) {
+      if (isDisposed || online) {
         return;
       }
 
@@ -466,7 +520,7 @@ export async function createGameApplication(
     },
 
     start(): void {
-      if (!isDisposed) {
+      if (!isDisposed && !online) {
         ++restoreGeneration;
         adapter.status = 'running';
         store.update({ status: 'running' });
@@ -474,7 +528,7 @@ export async function createGameApplication(
     },
 
     pause(): void {
-      if (!isDisposed) {
+      if (!isDisposed && !online) {
         adapter.status = 'paused';
         runtime.setSuspended('pause', true);
         input.reset();
@@ -518,7 +572,7 @@ export async function createGameApplication(
     },
 
     addBonus(points: number, key?: string): void {
-      if (isDisposed || !Number.isFinite(points) || points < 1 || (key !== undefined && bonusKeys.includes(key))) {
+      if (isDisposed || online || !Number.isFinite(points) || points < 1 || (key !== undefined && bonusKeys.includes(key))) {
         return;
       }
       bonus += Math.floor(points);
@@ -529,7 +583,109 @@ export async function createGameApplication(
       }
       store.update({ score, bestScore: progress.bestScores[dimension] ?? 0, rewardsClaimed: bonusKeys });
     },
+
+    async startOnline(connect: () => Promise<SyncplayRoomTransport>): Promise<void> {
+      if (isDisposed) return;
+      if (dimension !== '2d') throw new Error('Online play needs the 2D game.');
+      const expected = options.netIdentity;
+      if (!expected) throw new Error('Online play needs the game\'s netIdentity.');
+      app.leaveOnline();
+      await initPhysics2D();
+      const held = new Map<string, boolean>();
+      const session: OnlineSession = {
+        held, suspended: new Set(runtime.getSuspensionCauses().filter((cause) => cause !== 'pause')), jumpTicks: 0, restartTicks: 0, view: { state: 'connecting' }, unsubscribe: () => undefined,
+        runner: createSyncplayRunner({
+          runtimeFactory: (identity, bytes) => createNetRuntime(expected, identity, bytes, {
+            scene: options.scene2d, onCreate: (handle) => { session.adapter = handle.adapter; },
+          }),
+          defaultInput: NET_NEUTRAL_INPUT,
+          encodeInput: encodeNetInput,
+          decodeInput: decodeNetInput,
+          presentation: { project: (projection) => projection },
+          localInputForTick: () => {
+            const input = localNetInput({
+              held, suspended: session.suspended.size > 0,
+              jumpTapped: session.jumpTicks > 0, restartTapped: session.restartTicks > 0,
+            });
+            session.jumpTicks = Math.max(0, session.jumpTicks - 1);
+            session.restartTicks = Math.max(0, session.restartTicks - 1);
+            return input;
+          },
+        }),
+      };
+      online = session;
+      session.unsubscribe = session.runner.subscribe((snapshot) => {
+        session.snapshot = snapshot;
+        if (online === session) publishOnline();
+      });
+      store.update({ status: 'ready', online: session.view, notice: undefined });
+      try {
+        await session.runner.start({ mode: 'networked', connect });
+      } catch (error) {
+        if (online === session) {
+          session.view = { state: 'ended', message: 'Could not reach the room. Try again.' };
+          store.update({ online: session.view });
+        }
+        throw error;
+      }
+    },
+
+    leaveOnline(): void {
+      const session = online;
+      if (!session) return;
+      online = undefined;
+      session.unsubscribe();
+      void Promise.resolve(session.runner.dispose()).catch(console.warn);
+      lastAlpha = 0;
+      // The solo round missed the suspensions that changed while online.
+      for (const cause of runtime.getSuspensionCauses()) {
+        if (cause !== 'pause' && !session.suspended.has(cause)) runtime.setSuspended(cause, false);
+      }
+      for (const cause of session.suspended) runtime.setSuspended(cause, true);
+      input.reset();
+      store.update({
+        online: undefined, status: adapter.status === 'running' ? 'ready' : adapter.status, score: roundScore(),
+        secondsRemaining: adapter.secondsRemaining, objective: adapter.objective,
+        isSuspended: runtime.isSuspended(), suspensionCauses: runtime.getSuspensionCauses(),
+      });
+    },
+
+    get localPlayerId(): string {
+      const slot = online?.snapshot?.localSlot ?? 0;
+      return online ? seatEntityId(Math.max(0, slot)) : 'player';
+    },
   };
+
+  let online: OnlineSession | undefined;
+
+  function publishOnline(): void {
+    const session = online;
+    if (!session) return;
+    const snapshot = session.snapshot;
+    const world = session.adapter;
+    let next: OnlineView;
+    if (!snapshot || snapshot.status === 'connecting' || snapshot.status === 'syncing') {
+      next = { state: 'connecting', roomCode: snapshot?.roomCode };
+    } else if (snapshot.status === 'error' || snapshot.status === 'stopped') {
+      next = { state: 'ended', roomCode: snapshot.roomCode, message: 'The connection to your friend closed.' };
+    } else if (!world || world.status === 'ready') {
+      next = { state: 'waiting', roomCode: snapshot.roomCode };
+    } else {
+      next = { state: 'playing', roomCode: snapshot.roomCode };
+    }
+    if (!sameOnlineView(session.view, next)) session.view = next;
+    // A closed connection goes back to the start screen, which offers solo play again.
+    const status = next.state === 'ended' || !world || world.status === 'ready' ? 'ready' : world.status;
+    store.update({
+      online: session.view,
+      status,
+      score: world?.score ?? 0,
+      secondsRemaining: world?.secondsRemaining ?? null,
+      objective: world?.objective ?? 'Waiting for your friend.',
+      isSuspended: session.suspended.size > 0,
+      suspensionCauses: [...session.suspended],
+    });
+  }
 
   abortCleanup = app.dispose;
   return app;

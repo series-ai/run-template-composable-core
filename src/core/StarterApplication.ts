@@ -1,9 +1,11 @@
 import { ReferenceArt } from '../viewport/ReferenceArt';
 import { createGameApplication } from '../modules/runtime/game-application/createGameApplication';
 import type { Dimension, GameApplication, StorageLike } from '../modules/runtime/game-application/types';
-import type { GameSettings, GameShellActions, GameShellView } from '../modules/ui/game-shell/types';
+import type { GameSettings, GameShellActions, GameShellView, OnlineIntent } from '../modules/ui/game-shell/types';
 import { ParticleEmitter } from '../modules/two-d/scene/ParticleEmitter';
 import { startupTasks } from '../module-slots';
+import { netRuntimeIdentity } from './netIdentity.generated';
+import { shellOnlineView } from './onlineView';
 
 const initialView: GameShellView = {
   status: 'loading', dimension: '2d', score: 0, bestScore: 0,
@@ -25,6 +27,10 @@ export class StarterApplication {
   private hostReady: Promise<void> | undefined;
   private storageAdapter: StorageLike | undefined;
   private readonly inputSources = new Map<string, Set<string>>();
+  /** The room request in flight. Solo Play waits for it; Leave cancels it. */
+  private onlineRequest: object | undefined;
+  private gameLoaded: () => void = () => undefined;
+  private gameReady = new Promise<void>((resolve) => { this.gameLoaded = resolve; });
 
   readonly subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
@@ -32,7 +38,7 @@ export class StarterApplication {
   };
   readonly getView = (): GameShellView => this.view;
   readonly actions: GameShellActions = {
-    start: () => { this.unlockAudio(); this.game?.start(); },
+    start: () => { if (this.onlineRequest) return; this.unlockAudio(); this.game?.start(); },
     pause: () => {
       this.game?.pause();
       void this.game?.save().catch(console.warn);
@@ -61,7 +67,55 @@ export class StarterApplication {
       if (!this.game) return;
       this.game.addBonus(points, key); void this.game.save().catch(console.warn);
     },
+    playOnline: (intent) => this.playOnline(intent),
+    leaveOnline: () => {
+      this.onlineRequest = undefined;
+      this.clearInput(); this.game?.leaveOnline();
+      this.publish({ ...this.view, online: this.game?.getView().online });
+    },
   };
+
+  private async playOnline(intent: OnlineIntent): Promise<{ roomCode?: string }> {
+    const request = {};
+    this.onlineRequest = request;
+    this.publish({ ...this.view, online: shellOnlineView(undefined, true) });
+    try {
+      return await this.connectOnline(intent, request);
+    } finally {
+      if (this.onlineRequest === request) {
+        this.onlineRequest = undefined;
+        this.publish({ ...this.view, online: this.game?.getView().online });
+      }
+    }
+  }
+
+  private async connectOnline(intent: OnlineIntent, request: object): Promise<{ roomCode?: string }> {
+    this.unlockAudio();
+    await this.ensureHost();
+    if (this.view.dimension !== '2d') await this.load('2d');
+    await this.gameReady;
+    const game = this.game;
+    if (!game) throw new Error('The game is not ready.');
+    const [{ default: api }, rooms, net] = await Promise.all([
+      import('@series-inc/rundot-game-sdk/api'),
+      import('@series-inc/rundot-syncplay/browser'),
+      import('../modules/runtime/game-application/netRuntime'),
+    ]);
+    const roomOptions = {
+      maxPlayers: net.NET_SEATS,
+      runtimeIdentity: netRuntimeIdentity,
+      sessionConfigBytes: net.netSessionConfigBytes,
+      sessionConfigDigest: net.netSessionConfigDigest,
+    };
+    this.clearInput();
+    const transport = intent.kind === 'create' ? await rooms.createSyncplayRoom(api.realtime, roomOptions)
+      : intent.kind === 'join' ? await rooms.joinSyncplayRoomByCode(api.realtime, intent.roomCode)
+        : await rooms.quickMatchSyncplayRoom(api.realtime, roomOptions);
+    // Left or reloaded while the room was on its way: close it and stay solo.
+    if (this.game !== game || this.onlineRequest !== request) { transport.close(); return {}; }
+    await game.startOnline(async () => transport);
+    return { roomCode: transport.roomCode };
+  }
 
   async load(dimension: Dimension): Promise<void> {
     if (this.disposed) return;
@@ -80,11 +134,12 @@ export class StarterApplication {
     try {
       await this.ensureHost();
       if (this.disposed || generation !== this.generation) return;
-      next = await createGameApplication({ dimension, storage: this.storageAdapter, gameId: 'modules-starter' });
+      next = await createGameApplication({ dimension, storage: this.storageAdapter, gameId: 'modules-starter', netIdentity: netRuntimeIdentity });
       await next.restore();
       if (this.disposed || generation !== this.generation) { next.dispose(); return; }
       if (next.getView().status === 'running') next.pause();
       this.game = next;
+      this.gameLoaded();
       next.setSuspended('hidden', document.hidden);
       for (const cause of this.suspensionCauses) next.setSuspended(cause, true);
       let previousScore = next.getView().score;
@@ -111,7 +166,8 @@ export class StarterApplication {
         previousScore = view.score;
         if (view.status === 'results' && previousStatus !== 'results') void next.save().catch(console.warn);
         previousStatus = view.status;
-        this.publish({ ...view, instructions: view.instructions ? [...view.instructions] : undefined,
+        this.publish({ ...view, online: shellOnlineView(view.online, this.onlineRequest !== undefined),
+          instructions: view.instructions ? [...view.instructions] : undefined,
           canPickDimension: true, levelName: dimension === '2d' ? 'Sky garden' : 'Orb garden' });
       };
       this.unsubscribeGame = next.subscribe(syncView); syncView();
@@ -227,8 +283,9 @@ export class StarterApplication {
       }),
     ];
     this.cleanups.push(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
+    const startupContext = { playOnline: (intent: OnlineIntent) => this.playOnline(intent) };
     for (const task of startupTasks) {
-      void Promise.resolve().then(task).catch((error: unknown) => console.warn('A module could not start.', error));
+      void Promise.resolve().then(() => task(startupContext)).catch((error: unknown) => console.warn('A module could not start.', error));
     }
   }
   private publish(view: GameShellView): void {

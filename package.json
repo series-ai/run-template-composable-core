@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && rundot deploy",
-    "test": "node --import tsx --test verify/*.test.*"
+    "test": "node --import tsx --test verify/*.test.*",
+    "gen:net-identity": "node scripts/gen-net-identity.mjs"
   },
   "keywords": [
     "react19",

@@ -34,6 +34,8 @@ The gamepad mapping still needs a physical device check.
 - src/modules/two-d/scene/ supplies sprites, atlases, tiles, cameras, and particles.
 - src/modules/two-d/graphics/ supplies world text, shapes, masks, and bounded image effects.
 - src/modules/ui/game-shell/ supplies the shared DOM interface.
+- src/core/netIdentity.generated.ts is the online round's Syncplay identity. Run npm run gen:net-identity after changing the 2D simulation; npm test fails until you do.
+- rundot/rooms.config.json declares the deterministic room an online round uses. It does nothing until a module offers online play.
 
 The SDK storage adapter stores settings and best scores separately from round resumes.
 Each dimension has its own resume record.

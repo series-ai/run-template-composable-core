@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import SpriteBatchView from '../modules/two-d/scene/SpriteBatchView';
 import type { PresentationClock } from '../modules/two-d/scene/types';
 import type { PresentationFrame } from '../modules/runtime/game-application/types';
+import type { SceneDefinition2D } from '../modules/runtime/game-application/scene';
 import type { StarterApplication } from '../core/StarterApplication';
 import type { SpriteScene } from '../modules/two-d/scene/SpriteScene';
 import { REFERENCE_SCENE_2D, REFERENCE_SCENE_3D } from '../modules/runtime/game-application/scene';
 import { ParticleSprites } from '../modules/two-d/scene/ParticleSprites';
 import ParticleView from '../modules/two-d/scene/ParticleView';
 
-const definitions2d = new Map(REFERENCE_SCENE_2D.entities.map((entity) => [entity.id, entity]));
 const definitions3d = new Map(REFERENCE_SCENE_3D.entities.map((entity) => [entity.id, entity]));
 
 const CAMERA_3D_DIR = new THREE.Vector3(11, 13, 16).normalize();
@@ -92,13 +92,15 @@ function FrameBridge({ application, scene, clock, meshes, particles }: {
     clock.deltaSeconds = game.getView().isSuspended ? 0 : delta; clock.suspended = game.getView().isSuspended;
     if (particles?.current) particles.current.update(clock); else application.effects.update(clock);
     if (frame.dimension === '2d' && scene) {
-      const player = frame.poses.find((pair) => pair.entityId === 'player');
+      const player = frame.poses.find((pair) => pair.entityId === game.localPlayerId);
       if (player && camera instanceof THREE.OrthographicCamera) {
         const halfWidth = (camera.right - camera.left) / 2;
         const target = THREE.MathUtils.clamp(player.current.xMeters + 1, -12 + halfWidth, 16 - halfWidth);
         camera.position.x = THREE.MathUtils.lerp(camera.position.x, target, player.snap ? 1 : 1 - Math.exp(-8 * delta));
       }
       for (const pair of frame.poses) {
+        // A seat added by going online gets its sprite on the next render.
+        if (!scene.getNode(pair.entityId)) continue;
         const t = pair.snap ? 1 : frame.alpha;
         let angle = pair.current.angleRadians - pair.previous.angleRadians;
         angle = Math.atan2(Math.sin(angle), Math.cos(angle));
@@ -136,7 +138,14 @@ function FrameBridge({ application, scene, clock, meshes, particles }: {
 function FlatWorld({ application }: { application: StarterApplication }) {
   const art = application.art;
   const clock = useMemo<PresentationClock>(() => ({ epoch: 1, activeSeconds: 0, deltaSeconds: 0, suspended: true }), []);
+  // The scene changes when the round moves onto a shared room, which adds a player per seat.
+  const [sceneDefinition, setSceneDefinition] = useState(() => (application.game?.getScene() ?? REFERENCE_SCENE_2D) as SceneDefinition2D);
+  useFrame(() => {
+    const current = application.game?.getScene();
+    if (current && current.dimension === '2d' && current !== sceneDefinition) setSceneDefinition(current);
+  });
   const scene = useMemo(() => {
+    const definitions2d = new Map(sceneDefinition.entities.map((entity) => [entity.id, entity]));
     const next = art.createScene(); const frame = application.game!.getPresentation();
     for (const pair of frame.poses) {
       const definition = definitions2d.get(pair.entityId);
@@ -148,7 +157,7 @@ function FlatWorld({ application }: { application: StarterApplication }) {
         scaleX: width / 1.28, scaleY: height / 1.28, layerRank: definition.render.layerRank });
     }
     return next;
-  }, [application, art]);
+  }, [application, art, sceneDefinition]);
   const particles = useRef<ParticleSprites | null>(null);
   useEffect(() => {
     const binding = new ParticleSprites(scene, application.effects, { id: 'reward', atlasId: 'garden', frameId: 'star', layerRank: 4 });

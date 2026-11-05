@@ -71,6 +71,23 @@ export function ownScene<T extends SceneDefinition2D | SceneDefinition3D>(input:
   freeze(scene); return scene;
 }
 
+/** Entity id of the player a seat controls: `player` for seat 0, `player_<seat>` after it. */
+export function seatEntityId(seat: number): string {
+  return seat === 0 ? 'player' : `player_${seat}`;
+}
+
+/** Adds one copy of the scene's `player` per extra seat, spaced along x. */
+export function withSeats(scene: SceneDefinition2D, seats: number): SceneDefinition2D {
+  if (!Number.isInteger(seats) || seats < 1 || seats > 4) throw new Error('Seat count must be from 1 to 4.');
+  const player = scene.entities.find((entity) => entity.id === 'player');
+  if (!player) throw new Error('A multiplayer scene needs an entity with id "player".');
+  const extra: EntitySceneDefinition2D[] = [];
+  for (let seat = 1; seat < seats; seat += 1) {
+    extra.push({ ...player, id: seatEntityId(seat), position: [player.position[0] + seat * 1.2, player.position[1]] });
+  }
+  return { ...scene, entities: [...scene.entities, ...extra] };
+}
+
 /**
  * Immutable reference scene for 2D platformer.
  * Jump velocity 8.5 m/s and gravity 18 m/s^2 gives 2.0 m rise.

@@ -25,7 +25,7 @@ import type {
 } from './types.js';
 import type { TickInput } from './input.js';
 import { CURRENT_CHECKPOINT_VERSION, computeChecksum } from './journal.js';
-import { type SceneDefinition2D, ownScene, REFERENCE_SCENE_2D } from './scene.js';
+import { type SceneDefinition2D, ownScene, REFERENCE_SCENE_2D, seatEntityId } from './scene.js';
 
 export function uint8ArrayToBase64(bytes: Uint8Array): string {
   if (typeof Buffer !== 'undefined') {
@@ -89,13 +89,25 @@ export class WorldAdapter2D {
   }
 
   static async create(scene: SceneDefinition2D = REFERENCE_SCENE_2D): Promise<WorldAdapter2D> {
-    scene = ownScene(scene);
     await initPhysics2D();
+    return WorldAdapter2D.createLoaded(scene);
+  }
+
+  /** Synchronous create for runtime factories. `initPhysics2D()` must have resolved first. */
+  static createLoaded(scene: SceneDefinition2D = REFERENCE_SCENE_2D): WorldAdapter2D {
+    scene = ownScene(scene);
     const world = makeWorld(scene);
 
     const adapter = new WorldAdapter2D(world, scene);
     try { adapter.setupScene(); return adapter; }
     catch (error) { world.dispose(); throw error; }
+  }
+
+  /** Entity ids of the players, one per seat, in seat order. */
+  get seatIds(): readonly string[] {
+    const ids: string[] = [];
+    for (let seat = 0; this.entities.has(seatEntityId(seat)); seat += 1) ids.push(seatEntityId(seat));
+    return ids;
   }
 
   private setupScene(): void {
@@ -222,9 +234,10 @@ export class WorldAdapter2D {
   /**
    * Advances simulation by one fixed tick.
    */
-  step(fixedDt: number, input: TickInput): void {
-    const playerRecord = this.entities.get('player');
-    if (!playerRecord) {
+  step(fixedDt: number, input: TickInput | readonly TickInput[]): void {
+    const inputs = Array.isArray(input) ? input : [input as TickInput];
+    const players = this.seatIds.map((id) => this.entities.get(id)!);
+    if (players.length === 0) {
       return;
     }
 
@@ -240,20 +253,21 @@ export class WorldAdapter2D {
       }
     }
 
-    const playerBody = this.world.readBody(playerRecord.handle);
-    this.isGrounded = this.checkGrounded(playerRecord.bodyId, playerBody.x, playerBody.y);
+    const playerBodies = players.map((record) => this.world.readBody(record.handle));
+    const grounded = players.map((record, seat) =>
+      this.checkGrounded(record.bodyId, playerBodies[seat]!.x, playerBodies[seat]!.y));
+    this.isGrounded = grounded[0]!;
+    const playerBodyIds = new Set(players.map((record) => record.bodyId));
 
     // Observe trigger contacts from Syncplay
     const latestOutputs = this.world.latest();
     for (const contact of latestOutputs.contacts) {
-      const involvesPlayer =
-        contact.bodyA === playerRecord.bodyId || contact.bodyB === playerRecord.bodyId;
-      if (!involvesPlayer) {
+      const playerIsA = playerBodyIds.has(contact.bodyA);
+      if (!playerIsA && !playerBodyIds.has(contact.bodyB)) {
         continue;
       }
 
-      const otherBodyId =
-        contact.bodyA === playerRecord.bodyId ? contact.bodyB : contact.bodyA;
+      const otherBodyId = playerIsA ? contact.bodyB : contact.bodyA;
 
       if (contact.type === 'enter') {
         for (let i = 0; i < 5; i += 1) {
@@ -291,36 +305,40 @@ export class WorldAdapter2D {
       this.objective = 'Stage Clear! All stars collected.';
     }
 
-    // Apply movement
+    // Apply movement, one player per seat
     if (this.status === 'running') {
-      let vx = 0;
-      if (input.isHeld('left')) {
-        vx -= 6;
-      }
-      if (input.isHeld('right')) {
-        vx += 6;
-      }
-      if (input.isHeld('action')) {
-        vx *= 1.4;
-      }
+      players.forEach((playerRecord, seat) => {
+        const seatInput = inputs[seat];
+        const playerBody = playerBodies[seat]!;
+        let vx = 0;
+        if (seatInput?.isHeld('left')) {
+          vx -= 6;
+        }
+        if (seatInput?.isHeld('right')) {
+          vx += 6;
+        }
+        if (seatInput?.isHeld('action')) {
+          vx *= 1.4;
+        }
 
-      let vy = playerBody.vy;
-      if (input.wasPressed('jump') && this.isGrounded) {
-        vy = metersPerSecond(8.5);
-        this.isGrounded = false;
-      }
+        let vy = playerBody.vy;
+        if (seatInput?.wasPressed('jump') && grounded[seat]) {
+          vy = metersPerSecond(8.5);
+          if (seat === 0) this.isGrounded = false;
+        }
 
-      this.world.edit((ops) => {
-        ops.replaceBody(playerRecord.handle, {
-          shape: { type: 'circle', radius: meters(0.45) },
-          x: meters(playerBody.x),
-          y: meters(playerBody.y),
-          angle: playerBody.angle,
-          vx: metersPerSecond(vx),
-          vy: metersPerSecond(vy),
-          kind: 'dynamic',
-          mass: kilograms(1),
-          friction: 0.2,
+        this.world.edit((ops) => {
+          ops.replaceBody(playerRecord.handle, {
+            shape: { type: 'circle', radius: meters(0.45) },
+            x: meters(playerBody.x),
+            y: meters(playerBody.y),
+            angle: playerBody.angle,
+            vx: metersPerSecond(vx),
+            vy: metersPerSecond(vy),
+            kind: 'dynamic',
+            mass: kilograms(1),
+            friction: 0.2,
+          });
         });
       });
     }
