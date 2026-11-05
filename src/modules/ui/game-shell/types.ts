@@ -25,7 +25,18 @@ export interface GameShellView {
   levelName?: string
   /** Results actions whose reward this round already has, so they stay hidden after a reload. */
   rewardsClaimed?: readonly string[]
+  /** Present while the round is shared with other players. The start screen shows `waiting` and `ended`. */
+  online?: GameShellOnlineView
 }
+
+export interface GameShellOnlineView {
+  state: 'connecting' | 'waiting' | 'playing' | 'ended'
+  roomCode?: string
+  message?: string
+}
+
+/** How to reach a shared room: make one, join one by code, or be matched with anyone. */
+export type OnlineIntent = { kind: 'create' } | { kind: 'join'; roomCode: string } | { kind: 'quick-match' }
 
 export interface GameShellActions {
   start: () => void
@@ -40,6 +51,23 @@ export interface GameShellActions {
   setMenuOpen?: (open: boolean) => void
   /** Adds points to the finished round's score, best score and save. A key counts once per round. */
   addScore?: (points: number, key?: string) => void
+  /** Moves the round onto a shared room. Resolves with the room code once the room answers. */
+  playOnline?: (intent: OnlineIntent) => Promise<{ roomCode?: string }>
+  /** Leaves the shared room for a solo round. */
+  leaveOnline?: () => void
+}
+
+export interface StartActionContext {
+  playOnline: NonNullable<GameShellActions['playOnline']>
+}
+
+/** A button another module adds to the start screen, under Play. */
+export interface StartAction {
+  id: string
+  label: string
+  /** A SkinIcon name. An unknown name shows no icon. */
+  icon?: string
+  run: (context: StartActionContext) => Promise<void>
 }
 
 export interface ResultsActionContext {
@@ -96,6 +124,7 @@ export interface GameShellProps {
   children?: ReactNode
   touchControls?: TouchControlsConfig
   resultsActions?: ResultsAction[]
+  startActions?: StartAction[]
   className?: string
   style?: CSSProperties
 }

@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
+import { rundotMultiplayerPlugin } from "@series-inc/rundot-game-sdk/vite";
+import { DevSyncplayAuthorityRoom } from "@series-inc/rundot-syncplay/node";
 
 export default defineConfig({
   base: "./",
@@ -10,6 +12,8 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    // Copies the deterministic room config into the build; on `npm run dev` it also runs a local room authority.
+    rundotMultiplayerPlugin({ configPath: "rundot/rooms.config.json", deterministicRoomClass: DevSyncplayAuthorityRoom }),
   ],
   resolve: {
     alias: {

@@ -49,6 +49,7 @@ import '@modules/ui/game-shell/src/game-shell.css'
 | `settings` | `GameSettings?` | Sound and reduced motion options |
 | `canPickDimension` | `boolean?` | Shows dimension toggle button when true |
 | `instructions` | `string \| string[]?` | Control instructions for help menu |
+| `online` | `GameShellOnlineView?` | A shared round: `connecting`, `waiting` (the start screen shows the room code and Leave), `playing`, or `ended` with a `message` |
 
 ### Action Callbacks
 
@@ -64,6 +65,8 @@ import '@modules/ui/game-shell/src/game-shell.css'
 | `press` | `(action: string)` | Sends single button press command |
 | `setSettings` | `(settings: Partial<GameSettings>)` | Saves updated player preferences |
 | `addScore` | `(points: number, key?: string)?` | Adds points to the finished round, best score and save. A key counts once per round. Results buttons pass their id |
+| `playOnline` | `(intent: OnlineIntent)?` | Moves the round onto a shared room (`create`, `join` with a code, or `quick-match`). Resolves with the room code |
+| `leaveOnline` | `()?` | Leaves the shared room for a solo round |
 
 ## External Store Pattern
 
@@ -114,6 +117,27 @@ const resultsActions: ResultsAction[] = [{
 }]
 
 <GameShell view={view} actions={actions} resultsActions={resultsActions}>
+```
+
+## Start Buttons
+
+Other modules add buttons under Play on the start screen through `startActions`.
+They show only when `actions.playOnline` exists, and get it as `context.playOnline`.
+`playOnline` should set `view.online` to `connecting` at once: the start screen hides these buttons and Play while it is, and has no busy state of its own.
+While a shared room waits for players, the start screen shows the room code and a Leave button in place of Play and these buttons.
+If an action throws, the start screen shows a short notice.
+
+```tsx
+import type { StartAction } from '@modules/ui/game-shell/types'
+
+const startActions: StartAction[] = [{
+  id: 'quick-match',
+  label: 'Quick match',
+  icon: 'target',
+  run: async ({ playOnline }) => { await playOnline({ kind: 'quick-match' }) },
+}]
+
+<GameShell view={view} actions={actions} startActions={startActions}>
 ```
 
 ## Accessibility and Controls

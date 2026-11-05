@@ -2,6 +2,8 @@
  * Types and interfaces for the headless game application owner.
  */
 
+import type { SyncplayRoomTransport } from '@series-inc/rundot-syncplay/browser';
+import type { KinetixRuntimeIdentity } from '@series-inc/rundot-syncplay/core/runtime';
 import type { SceneDefinition2D, SceneDefinition3D } from './scene.js';
 
 export type Dimension = '2d' | '3d';
@@ -60,6 +62,18 @@ export interface GameViewModel {
   readonly instructions?: readonly string[];
   /** Keys of the rewards already added to this round with `addBonus`. */
   readonly rewardsClaimed?: readonly string[];
+  /** Present while the round is shared with other players. */
+  readonly online?: OnlineView;
+}
+
+/**
+ * State of a shared round. `waiting` means the room has a free seat and the round has not started.
+ * `ended` means the connection closed; `message` says why.
+ */
+export interface OnlineView {
+  readonly state: 'connecting' | 'waiting' | 'playing' | 'ended';
+  readonly roomCode?: string;
+  readonly message?: string;
 }
 
 /**
@@ -224,6 +238,8 @@ export interface CreateGameApplicationOptions {
   readonly signal?: AbortSignal;
   readonly scene2d?: SceneDefinition2D;
   readonly scene3d?: SceneDefinition3D;
+  /** The game's generated Syncplay identity. Without it, `startOnline` throws. */
+  readonly netIdentity?: KinetixRuntimeIdentity;
 }
 
 /**
@@ -258,4 +274,14 @@ export interface GameApplication {
    * call with the same key is ignored, including after a reload. A new round starts from zero again.
    */
   addBonus(points: number, key?: string): void;
+  /**
+   * Moves the round onto a shared room. `connect` returns the room's Syncplay transport.
+   * 2D only, and needs `netIdentity`. Resolves once the room answers; the round starts when every
+   * seat is filled.
+   */
+  startOnline(connect: () => Promise<SyncplayRoomTransport>): Promise<void>;
+  /** Leaves the shared room and returns to a solo round. */
+  leaveOnline(): void;
+  /** Entity id the local player controls, for the camera. */
+  readonly localPlayerId: string;
 }
