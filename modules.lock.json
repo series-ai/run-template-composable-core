@@ -1,0 +1,40 @@
+{
+  "lockfileVersion": 2,
+  "updatedAt": "",
+  "modules": {
+    "ui/game-shell": {
+      "catalogVersion": "unknown",
+      "status": "locked",
+      "ejected": false,
+      "installedAt": "",
+      "files": {
+        "src/modules/ui/game-shell/classNames.ts": "sha256:c4a71b3c4a5a75b4c4b624db6f4b235e6ee207a85cc775966dc72a9961635639",
+        "src/modules/ui/game-shell/game-shell.css": "sha256:e6fa6a3c7cb5bfec1dd578670b21807527065ae3821a161f9a3ac96019ed4949",
+        "src/modules/ui/game-shell/GameShell.tsx": "sha256:55b4036b6652d2bcd480d25d9e91275ce56d31ab521ff4649e1c9d2190036dd0",
+        "src/modules/ui/game-shell/GameShellHelpDialog.tsx": "sha256:0eb38ec57d80af3a6103bed48b17c4e9605361483f4b5e15244d34cd667e3060",
+        "src/modules/ui/game-shell/GameShellHud.tsx": "sha256:5a5aa0b066499573c7603c69878c5fbf15d7dc52d965a1e7083ce99b7e46d8aa",
+        "src/modules/ui/game-shell/GameShellPauseMenu.tsx": "sha256:a0e353907622571536a1f4cedd45e41ca69788540a30a10fe3d9f0072211e281",
+        "src/modules/ui/game-shell/GameShellResultsActions.tsx": "sha256:df2cfaf88409b969e8be420592798f4bcd2fedd7ec8bac8c46d1095cf49be744",
+        "src/modules/ui/game-shell/GameShellResultsOverlay.tsx": "sha256:ee1bd72955fe06acda6131068daee42e88f74257e8f194ad79b763061bd38fb2",
+        "src/modules/ui/game-shell/GameShellSettingsDialog.tsx": "sha256:bde995a5c088913d989d7989c2098fece7f14fec90ebd6214e10735ed7b12ca4",
+        "src/modules/ui/game-shell/GameShellStartOverlay.tsx": "sha256:2f8ac8b5532781208ce7bd037f11c5f44f678eb9eb4fc86b88e1bb1a2634cad8",
+        "src/modules/ui/game-shell/GameShellStore.ts": "sha256:a3d2b0b4ce68971528b071ac2a5acddc14a38aad83d70ff879f7a0668d49bb3f",
+        "src/modules/ui/game-shell/markUsed.ts": "sha256:cc08353a8c29f45deef812ccc1432bbb44092cbd5b8e1807b9444592bfc35e60",
+        "src/modules/ui/game-shell/module.json": "sha256:de585f957e95f2c2bcfaec1e7a3fb5fe7eb2835c8367090a795c9e7cd445de93",
+        "src/modules/ui/game-shell/SKILL.md": "sha256:29cf6f55d5ddaa2956a3bcbcc357437edbf988115897d70f9a49cefd35ce04fa",
+        "src/modules/ui/game-shell/SkinButton.tsx": "sha256:2871aa0d01430dc4ba2802c07ef8d59a96355da1125d018b1369fb367e4b257c",
+        "src/modules/ui/game-shell/SkinDialog.tsx": "sha256:f81e77f82153c21bb9fae4c9323cf6295d393deac415d971147510338ffa92bf",
+        "src/modules/ui/game-shell/SkinIcon.tsx": "sha256:c906c9667b6272336724a4325f0539ee7834249897247e955c615de6cea21a72",
+        "src/modules/ui/game-shell/SkinPanel.tsx": "sha256:5b594bef385ff423dcf7a6cf22ad8d7ee8d0a701bec0fa74e5f933e142a5672b",
+        "src/modules/ui/game-shell/SkinProgress.tsx": "sha256:47ab77ba4792cc4c6e8227d0b6a568ea8b89c1a034976ee8f1c9344f7c1b0120",
+        "src/modules/ui/game-shell/SkinState.tsx": "sha256:fe5e641c178b130b89c86a7c220827ba8d2c046b0cc02d2fd6f7684bed88008d",
+        "src/modules/ui/game-shell/SkinSwitch.tsx": "sha256:16e92e9395ec1b50afaf81f74ff790def84c06555b7f2e8d2d9a9b45f28c4642",
+        "src/modules/ui/game-shell/types.ts": "sha256:cc209b75df8b948097d6be25b751beb96f9df88e889ca46f39844bf170b7109b",
+        "src/modules/ui/game-shell/useDismissOnEscape.ts": "sha256:d18bce94dbec71cd1fb15dd9cf53e56cf44bab2106f82467ca77d08b7188a05e",
+        "src/modules/ui/game-shell/useFocusTrap.ts": "sha256:1c45f73579e3c995a4c6dfa946b442cec1b3e2fd23a81fe14488ddcd25720ff5",
+        "src/modules/ui/game-shell/VirtualTouchControls.tsx": "sha256:54bcfb61c8fa6df45971b05e6d9b5499e140cb6ce32e358d47f6331f1bcd543a"
+      },
+      "dependsOn": []
+    }
+  }
+}

@@ -1,8 +1,10 @@
 import type { GameShellStore, GameShellView } from './types'
+import { markUsed } from './markUsed'
 
 export function createGameShellStore(
   initialView: GameShellView
 ): GameShellStore {
+  markUsed()
   let state: GameShellView = { ...initialView }
   const listeners = new Set<() => void>()
 

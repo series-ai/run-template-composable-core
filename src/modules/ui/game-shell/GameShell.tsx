@@ -19,6 +19,7 @@ import type {
   GameShellStore,
   GameShellView,
 } from './types'
+import { markUsed } from './markUsed'
 
 function isStore(target: GameShellView | GameShellStore): target is GameShellStore {
   return (
@@ -41,6 +42,7 @@ export function GameShell({
   className,
   style,
 }: GameShellProps) {
+  markUsed()
   const isViewStore = isStore(viewProp)
 
   const view = useSyncExternalStore(
