@@ -140,6 +140,23 @@ const startActions: StartAction[] = [{
 <GameShell view={view} actions={actions} startActions={startActions}>
 ```
 
+## Styling
+
+Don't edit this module's files. Studio upgrades the shell in place while its files are unchanged, and an edited shell stops getting new drop-ins.
+Restyle it from the game's own CSS by overriding its variables on the shell's root element. Use this selector, which wins whichever stylesheet loads first:
+
+```css
+.game-shell[data-ui-theme='game-shell'] {
+  --game-shell-font: 'Press Start 2P', system-ui, sans-serif;
+  --game-shell-primary: #ff4f9a;
+  --game-shell-accent: #ffd23f;
+  --game-shell-surface: #1b1030;
+}
+```
+
+The variables are `--game-shell-font`, `-bg`, `-surface`, `-surface-raised`, `-border`, `-border-strong`, `-text`, `-text-muted`, `-primary`, `-primary-hover`, `-primary-text`, `-secondary`, `-secondary-hover`, `-secondary-text`, `-accent`, `-success`, `-error`, `-backdrop`, `-shadow`, `-control-bg`, `-control-border` and `-control-active`.
+Game-specific UI goes in the game's own components, rendered as the shell's children or over the canvas.
+
 ## Accessibility and Controls
 
 - Every button target has a minimum size of 44 by 44 pixels.
